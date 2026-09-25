@@ -1,0 +1,25 @@
+{
+  "name": "Juba Stadium - SSFA Official",
+  "short_name": "Juba Stadium",
+  "description": "Juba International Stadium - SSFA Ticket System - Secure Offline",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0033a0",
+  "theme_color": "#0033a0",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
