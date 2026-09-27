@@ -1,0 +1,22 @@
+{
+  "name": "Juba Stadium Tickets",
+  "short_name": "Juba Stadium",
+  "description": "Official ticketing for SSFA - South Sudan vs Kenya 26/09/2026",
+  "start_url": "/Juba-Stadium-/",
+  "display": "standalone",
+  "background_color": "#0a1628",
+  "theme_color": "#facc15",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "Logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "Logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
