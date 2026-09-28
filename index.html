@@ -45,6 +45,39 @@ td{border:1px solid #eee;padding:5px;word-break:break-all}
 </head>
 <body>
 <header class="top">
+  <body>
+
+  <header>... شعار استاد جوبا ...</header>
+
+  <!-- الصقي الفورم هنا بالضبط 👇 -->
+  <div style="max-width:420px;margin:20px auto;background:white;color:black;padding:20px;border-radius:15px;">
+    <h2>🏟️ حجز استاد جوبا</h2>
+    <input id="team" placeholder="اسم الفريق" style="width:100%;padding:12px;margin:8px 0;border-radius:8px">
+    <input id="phone" placeholder="رقم التلفون" style="width:100%;padding:12px;margin:8px 0;border-radius:8px">
+    <input id="date" type="date" style="width:100%;padding:12px;margin:8px 0;border-radius:8px">
+    <button id="bookBtn" style="width:100%;padding:14px;background:green;color:white;border:none;border-radius:10px;font-size:18px">احجز الآن ✅</button>
+    <ul id="list" style="margin-top:15px"></ul>
+  </div>
+  <!-- لحد هنا -->
+
+  <section>... باقي محتوى الصفحة ...</section>
+
+<script type="module">
+import { bookStadium, listenBookings } from './firebase.js';
+document.getElementById('bookBtn').onclick = async ()=>{
+  let team = document.getElementById('team').value;
+  let phone = document.getElementById('phone').value;
+  let date = document.getElementById('date').value;
+  if(!team || !date) return alert('املا البيانات');
+  await bookStadium(team, phone, date);
+  alert('✅ تم الحجز');
+};
+listenBookings((books)=>{
+  document.getElementById('list').innerHTML = books.map(b=>`<li>${b.team} - ${b.date}</li>`).join('');
+});
+</script>
+
+  </body>
 <div style="display:flex;align-items:center;gap:8px">
 <img src="./logo.png" alt="Juba Stadium Logo" width="32" height="32" style="border-radius:50%;background:#fff;padding:2px">
 <b>JUBA STADIUM • SSFA</b>
