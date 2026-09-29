@@ -75,7 +75,15 @@ table{width:100%;border-collapse:collapse} th{background:var(--blue);color:#fff;
 
     <!-- TICKET RESULT WITH QR + WHATSAPP + PRINT -->
     <div id="ticketResult" style="display:none;border:2px dashed var(--blue);padding:12px;margin-top:12px;border-radius:12px">
-      <h3 style="text-align:center">🎫 OFFICIAL TICKET</h3>
+      <div id="ticketResult" style="display:none;border:2px dashed var(--blue);padding:12px;margin-top:12px;border-radius:12px;text-align:center">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <img id="tLogo1" style="width:50px;height:50px;object-fit:contain">
+    <h3>🎫 OFFICIAL<br><small id="tID" style="font-size:10px"></small></h3>
+    <img id="tLogo2" style="width:50px;height:50px;object-fit:contain">
+  </div>
+  <div id="qrcode" style="display:flex;justify-content:center;margin:10px"></div>
+  <!-- باقي البيانات -->
+      </div>
       <div id="qrcode" style="display:flex;justify-content:center;margin:10px"></div>
       <p><b>ID:</b> <span id="tID"></span></p>
       <p><b>Match:</b> <span id="tMatch"></span></p>
