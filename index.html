@@ -3,151 +3,158 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JUBA STADIUM - Ticketing V16.1</title>
+<title>JUBA STADIUM • SSFA V16.2 Single File</title>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
-:root{--bg:#070b1a;--card:#111b3d;--text:#eaf0ff;--muted:#8aa0d0}
+:root{--bg:#070b1a;--card:#111b3d;--text:#eaf0ff;--muted:#8aa0d0;--gold:linear-gradient(90deg,#FFD700,#FFA500)}
 [data-theme="light"]{--bg:#f4f6ff;--card:#fff;--text:#0a1430;--muted:#5a6a90}
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Tajawal}
-body{background:var(--bg);color:var(--text);transition:.3s}
+body{background:var(--bg);color:var(--text)}
 header{background:var(--card);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:20;border-bottom:1px solid #ffffff15}
 .card{background:var(--card);border:1px solid #ffffff12;border-radius:16px;padding:16px;margin:12px auto;max-width:900px}
-.btn{background:#2d6bff;color:#fff;border:none;padding:11px 14px;border-radius:10px;cursor:pointer;font-weight:800}
-.btn.ghost{background:transparent;border:1px solid #ffffff25;color:var(--text)}
-.btn.gold{background:linear-gradient(90deg,#FFD700,#FFA500);color:#000}
-.btn.green{background:#00c853;color:#fff}
+.btn{border:none;padding:11px 14px;border-radius:10px;font-weight:900;cursor:pointer}
+.btn.primary{background:#2d6bff;color:#fff}.btn.ghost{background:transparent;border:1px solid #ffffff25;color:var(--text)}
+.btn.gold{background:var(--gold);color:#000}.btn.green{background:#00c853;color:#fff;width:100%;display:block;text-align:center;text-decoration:none;margin-top:8px}
 input,select{width:100%;padding:11px;margin:6px 0;border-radius:10px;background:var(--bg);color:var(--text);border:1px solid #ffffff1f}
-.match-card{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid #ffffff15;border-radius:14px;margin:10px 0;cursor:pointer}
-.match-card img{width:50px;height:50px;object-fit:contain;background:#fff;border-radius:50%;padding:4px}
-.badge{padding:4px 10px;border-radius:20px;font-size:11px;background:#1a2a5a;color:#fff}
+.match-card{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #ffffff15;border-radius:14px;margin:8px 0;cursor:pointer}
+.match-card img{width:52px;height:52px;object-fit:contain;background:#fff;border-radius:50%;padding:4px}
+.badge{background:#1a2a5a;color:#fff;padding:4px 10px;border-radius:20px;font-size:11px}
 .ticket{border:2px dashed #FFD700;padding:18px;border-radius:16px;background:var(--card);text-align:center}
 .hidden{display:none!important}
-.gold-text{background:linear-gradient(90deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
+.gold-text{background:var(--gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
 #loginOverlay{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
 .login-box{max-width:400px;width:100%;background:var(--card);padding:24px;border-radius:20px;border:1px solid #ffffff15;text-align:center}
-.call-btn{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(90deg,#FFD700,#FFA500);color:#000;padding:8px 14px;border-radius:20px;font-weight:900;font-size:12px;text-decoration:none;margin-top:10px;cursor:pointer}
+.call-btn{display:inline-flex;background:var(--gold);color:#000;padding:10px 16px;border-radius:20px;font-weight:900;text-decoration:none;cursor:pointer;margin-top:10px}
+.upload-label{background:var(--bg);border:1px dashed #FFD700;padding:10px;border-radius:10px;cursor:pointer;text-align:center;flex:1;font-size:12px}
 @media print{body *{visibility:hidden}.ticket,.ticket *{visibility:visible}.ticket{position:absolute;left:0;top:0;width:100%}}
 </style>
 </head>
 <body>
 <header>
-<div style="font-weight:900">🏟️ JUBA STADIUM • SSFA</div>
-<div><button class="btn ghost small" id="themeBtn">🌙</button> <button class="btn ghost small" id="langBtn">EN</button> <button class="btn ghost small" id="devBtn">لوحة المطور</button></div>
+<div style="font-weight:900">🏟️ JUBA STADIUM • V16.2</div>
+<div><button class="btn ghost" id="themeBtn">🌙</button> <button class="btn ghost" id="langBtn">EN</button> <button class="btn ghost" id="devBtn">المطور</button></div>
 </header>
 
-<!-- لوحة تسجيل دخول احترافية ثنائية اللغة -->
 <div id="loginOverlay">
 <div class="login-box">
 <h2 id="loginTitle">تسجيل دخول المطور</h2>
-<p id="loginSub" style="color:var(--muted);font-size:13px;margin:6px 0 12px">Developer Access Only</p>
-<input id="devId" placeholder="ID / المعرف">
-<input id="devPass" type="password" placeholder="Password / كلمة السر">
-<button class="btn" id="loginDevBtn" style="width:100%;margin-top:8px">دخول / Login</button>
+<p style="color:var(--muted);font-size:12px;margin:6px 0">Developer Access Only • SSFA National System</p>
+<input id="devId" placeholder="ID">
+<input id="devPass" type="password" placeholder="Password">
+<button class="btn primary" id="loginDevBtn" style="width:100%;margin-top:8px">دخول / Login</button>
 <p id="loginMsg" style="color:#ff6b7a;font-size:12px;margin-top:8px"></p>
 <a class="call-btn" id="callITBtn">📞 Call our IT team</a>
-<p id="phoneReveal" class="hidden" style="margin-top:8px"><a href="tel:0928813308" style="color:#FFD700;font-weight:900;text-decoration:none">0928813308 - اضغط للاتصال مباشرة</a></p>
+<p id="phoneReveal" class="hidden" style="margin-top:10px"><a href="tel:0928813308" style="color:#FFD700;font-weight:900;text-decoration:none;font-size:16px">0928813308 - اضغط للاتصال مباشرة</a></p>
 </div>
 </div>
 
 <div class="card" id="publicView">
-<h3 id="upcomingTitle">المباريات القادمة / Upcoming Matches</h3>
+<h3 id="upTitle">المباريات القادمة</h3>
 <div id="matchesList">Loading...</div>
-<div id="ticketForm" class="hidden" style="margin-top:16px">
-<h4 id="selectedMatchTitle"></h4>
+<div id="ticketForm" class="hidden" style="margin-top:14px;border-top:1px solid #ffffff15;padding-top:12px">
+<h4 id="selTitle"></h4>
 <select id="grade"><option value="VIP">الدرجة الأولى VIP - 20,000 SSP</option><option value="SECOND">الدرجة الثانية - 10,000 SSP</option><option value="THIRD">الدرجة الثالثة - 5,000 SSP</option><option value="SEVEN_MILE">مدرجات سبعة ميل - 2,000 SSP</option></select>
-<input id="fanName" placeholder="اسم المشجع / Fan Name"><input id="fanPhone" placeholder="رقم واتساب صحيح / Valid WhatsApp: 092xxxxxxx">
-<button class="btn gold" id="cutTicketBtn" style="width:100%">قطع التذكرة 🎫 / Cut Ticket</button>
-<p id="phoneError" style="color:#ff6b7a;font-size:11px;display:none">رقم غير صالح - يجب أن يكون 10 أرقام يبدأ بـ 09</p>
+<input id="fanName" placeholder="اسم المشجع" maxlength="40">
+<input id="fanPhone" placeholder="واتساب: 092xxxxxxx" maxlength="10" inputmode="numeric">
+<p id="phoneError" style="color:#ff6b7a;font-size:11px;display:none">رقم غير صالح - 10 أرقام يبدأ بـ 09</p>
+<button class="btn gold" id="cutBtn" style="width:100%">قطع التذكرة 🎫</button>
 </div>
 <div id="ticketResult" class="hidden"></div>
 </div>
 
 <div class="card hidden" id="devView">
-<h3>لوحة المطور - إضافة مباراة</h3>
-<select id="compType"><option value="LOCAL">الدوري المحلي - Local League</option><option value="CAFCL">دوري أبطال أفريقيا - CAFCL</option><option value="AFCON">تصفيات أمم أفريقيا - AFCON Qualifiers</option></select>
-<div style="display:flex;gap:8px"><input id="team1Name" placeholder="الفريق 1 / Team 1"><input id="team1Logo" placeholder="رابط شعار 1 / Logo URL 1"></div>
-<div style="display:flex;gap:8px"><input id="team2Name" placeholder="الفريق 2 / Team 2"><input id="team2Logo" placeholder="رابط شعار 2 / Logo URL 2"></div>
+<h3>لوحة المطور - إضافة مباراة (من ذاكرة الهاتف)</h3>
+<select id="compType"><option value="LOCAL">الدوري المحلي</option><option value="CAFCL">دوري أبطال أفريقيا</option><option value="AFCON">تصفيات أمم أفريقيا</option></select>
+<input id="team1Name" placeholder="الفريق الأول" maxlength="30">
+<div style="display:flex;gap:8px;align-items:center">
+<label class="upload-label">📁 شعار الفريق 1<input type="file" id="team1File" accept="image/png,image/jpeg,image/webp" hidden></label>
+<img id="prev1" style="width:44px;height:44px;border-radius:50%;display:none;background:#fff;object-fit:contain">
+</div>
+<input id="team2Name" placeholder="الفريق الثاني" maxlength="30">
+<div style="display:flex;gap:8px;align-items:center">
+<label class="upload-label">📁 شعار الفريق 2<input type="file" id="team2File" accept="image/png,image/jpeg,image/webp" hidden></label>
+<img id="prev2" style="width:44px;height:44px;border-radius:50%;display:none;background:#fff;object-fit:contain">
+</div>
 <input id="matchDate" type="datetime-local">
-<button class="btn" id="addMatchBtn" style="width:100%">حفظ المباراة ✅ / Save Match</button>
-<div id="devMatches"></div>
-<button class="btn ghost" id="backBtn" style="width:100%;margin-top:10px">رجوع / Back</button>
+<button class="btn primary" id="addBtn" style="width:100%">حفظ المباراة ✅</button>
+<div id="devList" style="margin-top:12px"></div>
+<button class="btn ghost" id="backBtn" style="width:100%;margin-top:10px">رجوع</button>
 </div>
 
 <script>
+// === إعدادات Firebase (كلها جوه نفس الملف) ===
 const firebaseConfig={apiKey:"AIzaSyDbPsfTygtodq8THsbSNZ4y2UTO0qHgr_4",authDomain:"ssnps-police-app-7018f.firebaseapp.com",projectId:"ssnps-police-app-7018f",storageBucket:"ssnps-police-app-7018f.firebasestorage.app",messagingSenderId:"705275454318",appId:"1:705275454318:web:a3cb76139563b6c33d977f"};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
+
+// === الحماية من الثغرات ===
 const esc=s=> (s||'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-let allMatches=[], selectedId=null, lang='ar', devLogged=false;
+const isValidPhone=p=> /^09\d{8}$/.test(p);
+const isImageType=t=> ['image/png','image/jpeg','image/webp'].includes(t);
+let allMatches=[], selectedId=null, lang='ar', devLogged=false, logo1='', logo2='';
 
-document.getElementById('themeBtn').onclick=()=>{const cur=document.documentElement.getAttribute('data-theme'); document.documentElement.setAttribute('data-theme',cur==='light'?'dark':'light');};
-document.getElementById('langBtn').onclick=()=>{
- lang=lang==='ar'?'en':'ar'; document.documentElement.dir=lang==='ar'?'rtl':'ltr';
- document.getElementById('loginTitle').textContent=lang==='ar'?'تسجيل دخول المطور':'Developer Login';
- document.getElementById('upcomingTitle').textContent=lang==='ar'?'المباريات القادمة':'Upcoming Matches';
- document.getElementById('langBtn').textContent=lang==='ar'?'EN':'عربي';
-};
+// ثيم + لغة
+document.getElementById('themeBtn').onclick=()=>{const cur=document.documentElement.getAttribute('data-theme');document.documentElement.setAttribute('data-theme',cur==='light'?'dark':'light');};
+document.getElementById('langBtn').onclick=()=>{lang=lang==='ar'?'en':'ar';document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.getElementById('upTitle').textContent=lang==='ar'?'المباريات القادمة':'Upcoming Matches';document.getElementById('langBtn').textContent=lang==='ar'?'EN':'عربي';};
 
-// زر Call IT Team مخفي
-document.getElementById('callITBtn').onclick=(e)=>{
- e.preventDefault();
- const rev=document.getElementById('phoneReveal');
- rev.classList.toggle('hidden');
- if(!rev.classList.contains('hidden')){window.location.href='tel:0928813308';}
-};
+// زر Call IT المخفي
+document.getElementById('callITBtn').onclick=e=>{e.preventDefault();const r=document.getElementById('phoneReveal');r.classList.toggle('hidden');if(!r.classList.contains('hidden')) window.location.href='tel:0928813308';};
 
-// دخول المطور
+// تسجيل دخول
 document.getElementById('loginDevBtn').onclick=()=>{
- const id=document.getElementById('devId').value.trim(); const pass=document.getElementById('devPass').value.trim();
- if((id==='ADMIN' && pass==='Juba@2026')||(id==='SSFA'&&pass==='0928813308')){
-  devLogged=true; document.getElementById('loginOverlay').style.display='none'; loadMatches();
- } else document.getElementById('loginMsg').textContent='ID أو باسورد غلط / Wrong credentials';
+ const id=document.getElementById('devId').value.trim(), pass=document.getElementById('devPass').value;
+ if((id==='ADMIN'&&pass==='Juba@2026')||(id==='SSFA'&&pass==='0928813308')){devLogged=true;document.getElementById('loginOverlay').style.display='none';loadMatches();}
+ else document.getElementById('loginMsg').textContent='خطأ / Wrong';
 };
-
-function isValidSouthSudanPhone(p){return /^09\d{8}$/.test(p);}
-
-document.getElementById('devBtn').onclick=()=>{
- if(!devLogged){document.getElementById('loginOverlay').style.display='flex'; return;}
- document.getElementById('publicView').classList.add('hidden'); document.getElementById('devView').classList.remove('hidden'); loadDev();
-};
+document.getElementById('devBtn').onclick=()=>{if(!devLogged){document.getElementById('loginOverlay').style.display='flex';return;}document.getElementById('publicView').classList.add('hidden');document.getElementById('devView').classList.remove('hidden');loadDev();};
 document.getElementById('backBtn').onclick=()=>{document.getElementById('devView').classList.add('hidden');document.getElementById('publicView').classList.remove('hidden');};
 
-document.getElementById('addMatchBtn').onclick=async()=>{
- const t1=document.getElementById('team1Name').value.trim(); const l1=document.getElementById('team1Logo').value.trim();
- const t2=document.getElementById('team2Name').value.trim(); const l2=document.getElementById('team2Logo').value.trim();
- const comp=document.getElementById('compType').value; const date=document.getElementById('matchDate').value;
+// قراية الشعارات من ذاكرة الهاتف
+document.getElementById('team1File').onchange=e=>{
+ const f=e.target.files[0]; if(!f) return; if(!isImageType(f.type)) return alert('نوع الصورة غير مسموح - PNG/JPG فقط'); if(f.size>400*1024) return alert('الصورة كبيرة >400KB');
+ const r=new FileReader(); r.onload=()=>{logo1=r.result;document.getElementById('prev1').src=r.result;document.getElementById('prev1').style.display='block';}; r.readAsDataURL(f);
+};
+document.getElementById('team2File').onchange=e=>{
+ const f=e.target.files[0]; if(!f) return; if(!isImageType(f.type)) return alert('نوع الصورة غير مسموح'); if(f.size>400*1024) return alert('الصورة كبيرة >400KB');
+ const r=new FileReader(); r.onload=()=>{logo2=r.result;document.getElementById('prev2').src=r.result;document.getElementById('prev2').style.display='block';}; r.readAsDataURL(f);
+};
+
+// حفظ مباراة
+document.getElementById('addBtn').onclick=async()=>{
+ const t1=document.getElementById('team1Name').value.trim(), t2=document.getElementById('team2Name').value.trim();
+ const comp=document.getElementById('compType').value, date=document.getElementById('matchDate').value;
  if(!t1||!t2||!date) return alert('املأ البيانات');
- if(!l1.startsWith('https://')||!l2.startsWith('https://')) return alert('الشعار يجب https://');
- await db.collection('juba_matches').add({team1:t1,team1Logo:l1,team2:t2,team2Logo:l2,competition:comp,date,created:Date.now()});
- alert('تم'); loadMatches(); loadDev();
+ if(!logo1||!logo2) return alert('اختار الشعارين من الهاتف');
+ if(t1.length<2||t2.length<2) return alert('اسم الفريق قصير');
+ await db.collection('juba_matches').add({team1:t1,team1Logo:logo1,team2:t2,team2Logo:logo2,competition:comp,date,created:Date.now()});
+ alert('تم ✅'); logo1='';logo2='';document.getElementById('prev1').style.display='none';document.getElementById('prev2').style.display='none';loadMatches();loadDev();
 };
 
 async function loadMatches(){
  const snap=await db.collection('juba_matches').orderBy('created','desc').get(); allMatches=[]; snap.forEach(d=>allMatches.push({id:d.id,...d.data()}));
- let h=''; allMatches.forEach(m=>{h+='<div class="match-card" onclick="selectMatch(\''+m.id+'\')"><img src="'+esc(m.team1Logo)+'" onerror="this.src=\'https://via.placeholder.com/50\'"><div style="flex:1"><b>'+esc(m.team1)+' vs '+esc(m.team2)+'</b><br><span class="badge">'+esc(m.competition)+'</span> <span style="font-size:11px;color:var(--muted)">'+esc(m.date)+'</span></div><img src="'+esc(m.team2Logo)+'" onerror="this.src=\'https://via.placeholder.com/50\'"></div>';});
- document.getElementById('matchesList').innerHTML=h||'No matches';
+ let h=''; allMatches.forEach(m=>{h+=`<div class="match-card" onclick="selectMatch('${m.id}')"><img src="${m.team1Logo}" onerror="this.src='https://via.placeholder.com/50'"><div style="flex:1"><b>${esc(m.team1)} vs ${esc(m.team2)}</b><br><span class="badge">${esc(m.competition)}</span> <span style="font-size:11px;color:var(--muted)">${esc(m.date)}</span></div><img src="${m.team2Logo}" onerror="this.src='https://via.placeholder.com/50'"></div>`;});
+ document.getElementById('matchesList').innerHTML=h||'لا يوجد';
 }
-async function loadDev(){const snap=await db.collection('juba_matches').orderBy('created','desc').get(); let h=''; snap.forEach(d=>{h+='<div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #ffffff10"><span>'+esc(d.data().team1)+' vs '+esc(d.data().team2)+'</span><button class="btn ghost small" onclick="delMatch(\''+d.id+'\')">مسح</button></div>';}); document.getElementById('devMatches').innerHTML=h;}
-window.delMatch=async id=>{if(confirm('مسح؟')){await db.collection('juba_matches').doc(id).delete(); loadMatches(); loadDev();}};
-window.selectMatch=id=>{selectedId=id; const m=allMatches.find(x=>x.id===id); document.getElementById('selectedMatchTitle').textContent=m.team1+' vs '+m.team2; document.getElementById('ticketForm').classList.remove('hidden');};
+async function loadDev(){const snap=await db.collection('juba_matches').orderBy('created','desc').get(); let h=''; snap.forEach(d=>{h+=`<div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #ffffff10"><span>${esc(d.data().team1)} vs ${esc(d.data().team2)}</span><button class="btn ghost" onclick="delMatch('${d.id}')">مسح</button></div>`;});document.getElementById('devList').innerHTML=h;}
+window.delMatch=async id=>{if(confirm('مسح؟')){await db.collection('juba_matches').doc(id).delete();loadMatches();loadDev();}};
+window.selectMatch=id=>{selectedId=id; const m=allMatches.find(x=>x.id===id); document.getElementById('selTitle').textContent=m.team1+' vs '+m.team2; document.getElementById('ticketForm').classList.remove('hidden'); window.scrollTo(0,300);};
 
-document.getElementById('cutTicketBtn').onclick=async()=>{
- const name=document.getElementById('fanName').value.trim(); const phone=document.getElementById('fanPhone').value.trim(); const grade=document.getElementById('grade').value;
- if(!isValidSouthSudanPhone(phone)){document.getElementById('phoneError').style.display='block';return;} else document.getElementById('phoneError').style.display='none';
+// قطع تذكرة + إرسال واتساب
+document.getElementById('cutBtn').onclick=async()=>{
+ const name=document.getElementById('fanName').value.trim(), phone=document.getElementById('fanPhone').value.trim(), grade=document.getElementById('grade').value;
+ if(!isValidPhone(phone)){document.getElementById('phoneError').style.display='block';return;}else document.getElementById('phoneError').style.display='none';
  if(!name||!selectedId) return alert('املأ البيانات');
- const m=allMatches.find(x=>x.id===selectedId); const ticketId='JUBA-'+Date.now().toString().slice(-8);
- const ticketData={ticketId,mId:selectedId,team1:m.team1,team2:m.team2,competition:m.competition,grade,date:m.date,fanName:esc(name),fanPhone:phone,created:Date.now(),used:false};
- await db.collection('juba_tickets').doc(ticketId).set(ticketData);
- showTicket(ticketData,m);
+ const m=allMatches.find(x=>x.id===selectedId); const tid='JUBA-'+Date.now().toString().slice(-8);
+ const data={ticketId:tid,mId:selectedId,team1:m.team1,team2:m.team2,competition:m.competition,grade,date:m.date,fanName:esc(name),fanPhone:phone,created:Date.now(),used:false};
+ await db.collection('juba_tickets').doc(tid).set(data); showTicket(data,m);
 };
-
 function showTicket(t,m){
- const waText=encodeURIComponent('🏟️ تذكرتك الرسمية - استاد جوبا\n'+m.team1+' vs '+m.team2+'\nالدرجة: '+t.grade+'\nID: '+t.ticketId+'\nالتاريخ: '+m.date+'\nرابط التحقق: https://kolasadik8-design.github.io/Juba-Stadium-/gate.html');
- const waLink='https://wa.me/211'+t.fanPhone.slice(1)+'?text='+waText;
+ const waText=encodeURIComponent(`🏟️ تذكرتك الرسمية - استاد جوبا\n${m.team1} vs ${m.team2}\nالدرجة: ${t.grade}\nID: ${t.ticketId}\nالتاريخ: ${m.date}\nفحص: https://kolasadik8-design.github.io/Juba-Stadium-/gate.html`);
+ const waLink=`https://wa.me/211${t.fanPhone.slice(1)}?text=${waText}`;
  const div=document.getElementById('ticketResult'); div.classList.remove('hidden');
- div.innerHTML='<div class="ticket" id="printArea"><h3 class="gold-text">JUBA STADIUM OFFICIAL TICKET</h3><div style="display:flex;justify-content:center;gap:16px;margin:12px 0"><img src="'+esc(m.team1Logo)+'" style="width:60px;height:60px;background:#fff;border-radius:50%"><b>VS</b><img src="'+esc(m.team2Logo)+'" style="width:60px;height:60px;background:#fff;border-radius:50%"></div><h4>'+esc(m.team1)+' vs '+esc(m.team2)+'</h4><p><span class="badge">'+esc(m.competition)+'</span> '+esc(m.date)+'</p><p>الدرجة: <b>'+esc(t.grade)+'</b> | '+esc(t.fanName)+' | '+esc(t.fanPhone)+'</p><div id="qrcode" style="display:flex;justify-content:center;margin:12px 0"></div><p style="font-size:11px">ID: '+esc(t.ticketId)+'</p><button class="btn gold" onclick="window.print()" style="width:100%;margin-top:8px">🖨️ طباعة التذكرة / Print</button><a href="'+waLink+'" target="_blank" class="btn green" style="width:100%;display:block;text-align:center;margin-top:8px;text-decoration:none">💬 إرسال واتساب / Send WhatsApp</a><a href="tel:'+esc(t.fanPhone)+'" class="btn ghost" style="width:100%;display:block;text-align:center;margin-top:8px;text-decoration:none">📞 اتصال / Call '+esc(t.fanPhone)+'</a><p class="gold-text" style="margin-top:10px">Call our IT team 0928813308</p></div>';
+ div.innerHTML=`<div class="ticket" id="printArea"><h3 class="gold-text">JUBA STADIUM OFFICIAL TICKET</h3><div style="display:flex;justify-content:center;gap:16px;margin:12px 0"><img src="${m.team1Logo}" style="width:60px;height:60px;background:#fff;border-radius:50%"><b>VS</b><img src="${m.team2Logo}" style="width:60px;height:60px;background:#fff;border-radius:50%"></div><h4>${esc(m.team1)} vs ${esc(m.team2)}</h4><p><span class="badge">${esc(m.competition)}</span> ${esc(m.date)}</p><p>الدرجة: <b>${esc(t.grade)}</b> | ${esc(t.fanName)} | ${esc(t.fanPhone)}</p><div id="qrcode" style="display:flex;justify-content:center;margin:12px 0"></div><p style="font-size:11px">ID: ${esc(t.ticketId)}</p><button class="btn gold" onclick="window.print()" style="width:100%;margin-top:8px">🖨️ طباعة / Print</button><a href="${waLink}" target="_blank" class="btn green">💬 إرسال واتساب / Send WhatsApp</a><a href="tel:${esc(t.fanPhone)}" class="btn ghost" style="width:100%;display:block;text-align:center;margin-top:8px;text-decoration:none">📞 اتصال</a><p style="margin-top:10px"><span class="gold-text">Call our team 0928813308</span></p></div>`;
  new QRCode(document.getElementById("qrcode"), {text:t.ticketId,width:150,height:150});
 }
 loadMatches();
