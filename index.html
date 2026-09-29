@@ -157,8 +157,66 @@ window.issueSecureTicket=async()=>{
   window._last={id,name,phone,total,match:document.getElementById('matchInfo').innerText,seat};
   window.scrollTo(0,document.body.scrollHeight);
 }
-window.sendWhatsApp=()=>{ const t=window._last; if(!t)return; const msg=`🎫 JUBA STADIUM\nID:${t.id}\nName:${t.name}\nMatch:${t.match}\nSeat:${t.seat}\nTotal:${t.total.toLocaleString()} SSP\nQR: https://ik8-design.github.io/verify.html?id=${t.id}`; const waPhone=t.phone.startsWith('0')?'211'+t.phone.substring(1):t.phone; window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`,'_blank'); }
+  } // <-- نهاية issueSecureTicket (السطر 158 تقريبا)
+
+window.sendWhatsApp=()=>{ const t=window._last; ... }
+
+// --- من هنا الصق الجديد ---
+window.uploadLogo = (input, key)=>{ ... }
+async function loadLogos(){ ... }
+async function loadTicketList(){ ... }
+window.cancelTicket = async (docId, tid)=>{ ... }
+window.searchTickets = ()=>{ ... }
+
+loadLogos();
+loadTicketList();
+// --- لحدي هنا ---
+
 loadPrices();
+</script>
+window.sendWhatsApp=()=>{ const t=window._last; if(!t)return; const msg=`🎫 JUBA STADIUM\nID:${t.id}\nName:${t.name}\nMatch:${t.match}\nSeat:${t.seat}\nTotal:${t.total.toLocaleString()} SSP\nQR: https://ik8-design.github.io/verify.html?id=${t.id}`; const waPhone=t.phone.startsWith('0')?'211'+t.phone.substring(1):t.phone; window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`,'_blank'); }
+// --- LOGOS ---
+window.uploadLogo = (input, key)=>{
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e)=>{
+    const base64 = e.target.result;
+    localStorage.setItem('juba_'+key, base64);
+    document.getElementById(key+'Preview').src = base64;
+    document.getElementById(key+'Preview').style.display='block';
+    await setDoc(doc(db,'settings','logos'), {[key]: base64}, {merge:true});
+  }; reader.readAsDataURL(file);
+}
+async function loadLogos(){
+  const snap = await getDoc(doc(db,'settings','logos'));
+  let logos = snap.exists()? snap.data() : {};
+  if(snap.exists() && logos.logo1) document.getElementById('tLogo1').src = logos.logo1;
+  if(snap.exists() && logos.logo2) document.getElementById('tLogo2').src = logos.logo2;
+}
+async function loadTicketList(){
+  const snap = await getDocs(collection(db,'juba_matches_tickets'));
+  const tbody = document.getElementById('ticketList');
+  if(!tbody) return; tbody.innerHTML='';
+  snap.forEach(d=>{
+    const t=d.data();
+    tbody.innerHTML+=`<tr><td style="font-size:9px">${t.id}</td><td>${t.name}</td><td>${t.type}</td><td>${t.total?.toLocaleString()}</td><td><button onclick="cancelTicket('${d.id}','${t.id}')" style="background:#b91c1c;color:#fff;border:0;border-radius:6px;padding:3px 6px">X</button></td></tr>`;
+  });
+  if(document.getElementById('myStats')) document.getElementById('myStats').innerText = `${snap.size} tickets - ${snap.docs.reduce((s,x)=>s+(x.data().total||0),0).toLocaleString()} SSP`;
+}
+window.cancelTicket = async (docId, tid)=>{
+  if(!confirm('إلغاء '+tid+' ؟')) return;
+  await deleteDoc(doc(db,'juba_matches_tickets', docId));
+  loadTicketList();
+}
+window.searchTickets = ()=>{
+  const s=document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('#ticketList tr').forEach(tr=>tr.style.display=tr.innerText.toLowerCase().includes(s)?'':'none');
+}
+
+// --- تشغيل ---
+loadLogos();
+loadTicketList();
+  loadPrices();
 </script>
 </body>
   </html>
