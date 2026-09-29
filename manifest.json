@@ -1,16 +1,9 @@
 {
-  "name": "Juba Stadium",
-  "short_name": "JubaStadium",
-  "description": "Juba National Stadium Official",
-  "start_url": "/Juba-Stadium-/",
+  "name": "Juba Stadium Tickets",
+  "short_name": "Juba Stadium",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0a192f",
-  "theme_color": "#00d4ff",
-  "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+  "background_color": "#070b1a",
+  "theme_color": "#FFD700",
+  "icons": [{"src": "icon.png","sizes": "512x512","type": "image/png"}]
 }
