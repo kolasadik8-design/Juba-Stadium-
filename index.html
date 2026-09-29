@@ -1,150 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Juba Stadium - Secure Ticketing SSP</title>
+<title>Juba Stadium - Secure SSP</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-:root{--blue:#0a3a8a;--gold:#d4a71c;--dark:#1e1e1e}
+:root{--blue:#0a3a8a;--gold:#d4a71c}
 body{font-family:system-ui;background:#f4f6fb;margin:0}
-.top-bar{background:var(--blue);color:#fff;padding:10px;text-align:center;font-weight:bold}
+.top-bar{background:var(--blue);color:#fff;padding:12px;text-align:center;font-weight:bold}
 .card{background:#fff;border-radius:16px;padding:16px;margin:12px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-.btn-gold{background:var(--gold);border:0;padding:12px 18px;border-radius:12px;font-weight:bold;width:100%;cursor:pointer}
-.btn-blue{background:var(--blue);color:#fff;border:0;padding:14px;border-radius:12px}
+.btn-gold{background:var(--gold);border:0;padding:12px;border-radius:12px;font-weight:bold;width:100%;cursor:pointer}
+.btn-blue{background:var(--blue);color:#fff;border:0;padding:12px;border-radius:10px;cursor:pointer;flex:1}
 .ticket-type{display:flex;gap:10px;margin:12px 0}
-.ticket-type button{flex:1;padding:16px;border-radius:14px;border:3px solid transparent;font-weight:bold;color:#fff;cursor:pointer}
+.ticket-type button{flex:1;padding:16px;border-radius:14px;border:3px solid transparent;font-weight:bold;color:#fff}
 .ticket-type .active{border-color:gold;transform:scale(1.05)}
 .vip{background:#0a3a8a} .second{background:#0a8a2e} .sabaa{background:#c41e2d}
 input{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:1px solid #ccc;box-sizing:border-box}
 table{width:100%;border-collapse:collapse} th{background:var(--blue);color:#fff;padding:8px} td{padding:8px;border-bottom:1px solid #eee}
-.del{background:#b91c1c;color:#fff;border:0;border-radius:14px;padding:4px 10px;cursor:pointer}
-@media print{.no-print{display:none} .print-only{display:block!important}}
+@media print{.no-print{display:none} #ticketResult{display:block!important;border:2px solid #000}}
 </style>
 </head>
 <body>
-<div class="top-bar">JUBA INTERNATIONAL STADIUM - SECURE SSP SYSTEM</div>
+<div class="top-bar">JUBA INTERNATIONAL STADIUM - SECURE SSP</div>
 
-<div class="card no-print" id="adminCard">
-  <button class="btn-gold" onclick="addAdminSecure()">+ Add Admin Secure</button>
-  <div style="margin-top:12px;overflow:auto">
-    <table id="adminTable"><thead><tr><th>User</th><th>Branch</th><th>Role</th><th>Action</th></tr></thead><tbody></tbody></table>
+<!-- 1- ADMIN PRICE CONTROL - ADMIN ONLY -->
+<div class="card no-print" id="priceAdminPanel" style="display:none;background:#fff3cd">
+  <b>🔒 Admin Only - Edit Ticket Prices (SSP)</b>
+  <div style="display:flex;gap:6px;margin-top:8px">
+    <input id="pVIP" type="number" placeholder="VIP Price">
+    <input id="pSecond" type="number" placeholder="Second Price">
+    <input id="pSabaa" type="number" placeholder="Sabaa Mail Price">
   </div>
+  <button class="btn-gold" style="margin-top:8px" onclick="savePrices()">Save Prices</button>
 </div>
 
 <div style="display:flex;flex-wrap:wrap">
-  <div class="card" style="flex:1;min-width:300px">
-    <h3>Issue Ticket - <span id="branchLabel">all</span></h3>
-    <div class="btn-blue" id="matchInfo" style="text-align:center">⚽ South Sudan vs Egypt - 26/09/2026, 05:06:00 - Juba International Stadium</div>
+  <!-- 2- ISSUE TICKET HEADER - PLACE 1 -->
+  <div class="card" style="flex:1;min-width:320px">
+    <h3 id="issueTitle">Issue Ticket - <span id="branchLabel">all</span></h3>
+    <div id="matchInfo" style="background:var(--blue);color:#fff;padding:10px;border-radius:10px;text-align:center">⚽ South Sudan vs Egypt - 26/09/2026 - Juba International Stadium</div>
     
     <div class="ticket-type">
-      <button class="vip active" data-price="50000" onclick="selectType(this, 'VIP', 50000)">VIP<br>50k</button>
-      <button class="second" data-price="30000" onclick="selectType(this, 'Second', 30000)">Second<br>30k</button>
-      <button class="sabaa" data-price="15000" onclick="selectType(this, 'Sabaa Mail', 15000)">Sabaa Mail<br>15k</button>
+      <button class="vip active" id="btnVIP" data-price="50000" onclick="selectType(this,'VIP')">VIP<br><span id="labelVIP">50,000 SSP</span></button>
+      <button class="second" id="btnSecond" data-price="30000" onclick="selectType(this,'Second')">Second<br><span id="labelSecond">30,000 SSP</span></button>
+      <button class="sabaa" id="btnSabaa" data-price="15000" onclick="selectType(this,'Sabaa Mail')">Sabaa Mail<br><span id="labelSabaa">15,000 SSP</span></button>
     </div>
 
     <input id="fullName" placeholder="Full Name - Letters only" oninput="validateName(this)">
-    <small id="nameErr" style="color:red;display:none">Only letters and spaces allowed</small>
-    
+    <small id="nameErr" style="color:red;display:none">Letters only (3-30)</small>
     <input id="phone" placeholder="09xxxxxxxx" maxlength="10" oninput="validatePhone(this)">
-    <small id="phoneErr" style="color:red;display:none">Must be 09xxxxxxxx (10 digits)</small>
-
+    <small id="phoneErr" style="color:red;display:none">Must be 09xxxxxxxx</small>
     <div style="display:flex;gap:8px">
       <input id="qty" type="number" value="1" min="1" max="10" oninput="calcTotal()" style="flex:1">
       <input id="seat" placeholder="Seat A1" style="flex:2">
     </div>
-
     <h3>Total: <span id="total">50000</span> SSP</h3>
-    <button class="btn-gold" onclick="issueSecureTicket()">Issue Secure Ticket</button>
-    
-    <div id="ticketResult" style="display:none;border:2px dashed #0a3a8a;padding:12px;margin-top:12px;border-radius:12px">
-      <h3 style="text-align:center">🎫 JUBA STADIUM TICKET</h3>
+
+    <!-- 3- ISSUE SECURE TICKET BUTTON - PLACE 2 -->
+    <button class="btn-gold" id="issueBtn" onclick="issueSecureTicket()">Issue Secure Ticket</button>
+
+    <!-- TICKET RESULT WITH QR + WHATSAPP + PRINT -->
+    <div id="ticketResult" style="display:none;border:2px dashed var(--blue);padding:12px;margin-top:12px;border-radius:12px">
+      <h3 style="text-align:center">🎫 OFFICIAL TICKET</h3>
+      <div id="qrcode" style="display:flex;justify-content:center;margin:10px"></div>
+      <p><b>ID:</b> <span id="tID"></span></p>
       <p><b>Match:</b> <span id="tMatch"></span></p>
       <p><b>Name:</b> <span id="tName"></span> | <b>Phone:</b> <span id="tPhone"></span></p>
-      <p><b>Type:</b> <span id="tType"></span> | <b>Seat:</b> <span id="tSeat"></span></p>
-      <p><b>ID:</b> <span id="tID"></span> | <b>Total:</b> <span id="tTotal"></span> SSP</p>
+      <p><b>Type/Seat:</b> <span id="tType"></span> / <span id="tSeat"></span></p>
+      <p><b>Total:</b> <span id="tTotal"></span> SSP</p>
       <div class="no-print" style="display:flex;gap:6px;margin-top:10px">
-        <button class="btn-blue" style="flex:1" onclick="sendWhatsApp()">📱 WhatsApp</button>
-        <button class="btn-blue" style="flex:1" onclick="window.print()">🖨️ Print</button>
+        <button class="btn-blue" onclick="sendWhatsApp()">📱 Send WhatsApp</button>
+        <button class="btn-blue" onclick="window.print()">🖨️ Print Ticket</button>
       </div>
     </div>
-  </div>
-
-  <div class="card no-print" style="flex:1;min-width:300px">
-    <h3>My Stats</h3>
-    <p>My: <span id="myStats">12 tickets - 415,000 SSP</span></p>
-    <input id="search" placeholder="Search ID / Name" oninput="searchTickets()">
-    <table><thead><tr><th>ID</th><th>Name</th></tr></thead><tbody id="ticketList"></tbody></table>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig = { apiKey:"YOUR_API_KEY", authDomain:"YOUR_DOMAIN", projectId:"YOUR_PROJECT_ID" };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB65erIbKPojeJCtvWCaUPNBqA_YQ6QGJ0",
-  authDomain: "juba-stadium-1ace0.firebaseapp.com",
-  projectId: "juba-stadium-1ace0",
-  storageBucket: "juba-stadium-1ace0.firebasestorage.app",
-  messagingSenderId: "299347484908",
-  appId: "1:299347484908:web:926e359973c26aa1f0c5c9"
-};
+let prices={VIP:50000,Second:30000,Sabaa:15000}, currentType='VIP', currentPrice=50000;
+const user = JSON.parse(localStorage.getItem('juba_user')||'{"role":"admin","username":"ADMIN"}');
 
-let currentType='VIP', currentPrice=50000, currentBranch='all';
+async function loadPrices(){
+  try{ const s=await getDoc(doc(db,'settings','ticketPrices')); if(s.exists()) prices=s.data(); }catch(e){}
+  document.getElementById('labelVIP').innerText=prices.VIP.toLocaleString()+' SSP';
+  document.getElementById('labelSecond').innerText=prices.Second.toLocaleString()+' SSP';
+  document.getElementById('labelSabaa').innerText=prices.Sabaa.toLocaleString()+' SSP';
+  document.getElementById('btnVIP').dataset.price=prices.VIP; document.getElementById('btnSecond').dataset.price=prices.Second; document.getElementById('btnSabaa').dataset.price=prices.Sabaa;
+  currentPrice=prices.VIP; calcTotal();
+  if(user.role==='admin'){ document.getElementById('priceAdminPanel').style.display='block'; document.getElementById('pVIP').value=prices.VIP; document.getElementById('pSecond').value=prices.Second; document.getElementById('pSabaa').value=prices.Sabaa; }
+}
+window.selectType=(el,type)=>{ document.querySelectorAll('.ticket-type button').forEach(b=>b.classList.remove('active')); el.classList.add('active'); currentType=type; currentPrice=parseInt(el.dataset.price); calcTotal(); }
+window.calcTotal=()=>{ let q=parseInt(document.getElementById('qty').value)||1; if(q<1)q=1; if(q>10)q=10; document.getElementById('qty').value=q; document.getElementById('total').innerText=(q*currentPrice).toLocaleString(); }
+window.validateName=(el)=>{ const ok=/^[A-Za-z\s]{3,30}$/.test(el.value); document.getElementById('nameErr').style.display=ok||!el.value?'none':'block'; return ok; }
+window.validatePhone=(el)=>{ el.value=el.value.replace(/[^0-9]/g,''); const ok=/^09\d{8}$/.test(el.value); document.getElementById('phoneErr').style.display=ok||!el.value?'none':'block'; return ok; }
+window.savePrices=async()=>{
+  if(user.role!=='admin'){alert('⛔ Admin only');return}
+  const np={VIP:parseInt(document.getElementById('pVIP').value), Second:parseInt(document.getElementById('pSecond').value), Sabaa:parseInt(document.getElementById('pSabaa').value), updatedBy:user.username, updatedAt:new Date()};
+  await setDoc(doc(db,'settings','ticketPrices'),np); alert('✅ Prices saved'); loadPrices();
+}
 
-window.selectType = (el,type,price)=>{
-  document.querySelectorAll('.ticket-type button').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active'); currentType=type; currentPrice=price; calcTotal();
-}
-window.calcTotal = ()=>{
-  let q=parseInt(document.getElementById('qty').value)||1;
-  if(q<1)q=1; if(q>10)q=10; document.getElementById('qty').value=q;
-  document.getElementById('total').innerText = (q*currentPrice).toLocaleString();
-}
-window.validateName = (el)=>{
-  const ok = /^[A-Za-z\s]{3,30}$/.test(el.value);
-  document.getElementById('nameErr').style.display = ok||el.value==''?'none':'block';
-  return ok;
-}
-window.validatePhone = (el)=>{
-  el.value = el.value.replace(/[^0-9]/g,'');
-  const ok = /^09\d{8}$/.test(el.value);
-  document.getElementById('phoneErr').style.display = ok||el.value==''?'none':'block';
-  return ok;
-}
-window.issueSecureTicket = async ()=>{
-  const name=document.getElementById('fullName').value.trim();
-  const phone=document.getElementById('phone').value.trim();
-  if(!validateName(document.getElementById('fullName'))){alert('الاسم لازم حروف انجليزية فقط');return}
-  if(!validatePhone(document.getElementById('phone'))){alert('رقم التلفون لازم 09xxxxxxxx');return}
-  
-  const id = Math.random().toString(36).substring(2,5).toUpperCase()+'-'+Math.random().toString(36).substring(2,6).toUpperCase();
-  const total = (parseInt(document.getElementById('qty').value)*currentPrice);
-  
-  // Secure save - server timestamp
-  await addDoc(collection(db,'juba_matches_tickets'),{
-    id, name, phone, type:currentType, seat:document.getElementById('seat').value||'General',
-    price:currentPrice, total, currency:'SSP', match:'South Sudan vs Egypt', stadium:'Juba International Stadium',
-    createdAt:new Date(), branch:currentBranch
-  });
-
-  // Show printable ticket
-  document.getElementById('tMatch').innerText=document.getElementById('matchInfo').innerText;
-  document.getElementById('tName').innerText=name; document.getElementById('tPhone').innerText=phone;
-  document.getElementById('tType').innerText=currentType; document.getElementById('tSeat').innerText=document.getElementById('seat').value;
-  document.getElementById('tID').innerText=id; document.getElementById('tTotal').innerText=total.toLocaleString();
+// PLACE 3 - ISSUE SECURE TICKET FUNCTION
+window.issueSecureTicket=async()=>{
+  const name=document.getElementById('fullName').value.trim(), phone=document.getElementById('phone').value.trim();
+  if(!validateName(document.getElementById('fullName'))){alert('الاسم حروف فقط');return}
+  if(!validatePhone(document.getElementById('phone'))){alert('الرقم لازم 09xxxxxxxx');return}
+  const id='JUBA-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).substring(2,5).toUpperCase();
+  const qty=parseInt(document.getElementById('qty').value), total=qty*currentPrice, seat=document.getElementById('seat').value||'General';
+  await addDoc(collection(db,'juba_matches_tickets'),{id,name,phone,type:currentType,seat,price:currentPrice,total,currency:'SSP',match:document.getElementById('matchInfo').innerText,used:false,createdAt:new Date()});
+  document.getElementById('tID').innerText=id; document.getElementById('tMatch').innerText=document.getElementById('matchInfo').innerText; document.getElementById('tName').innerText=name; document.getElementById('tPhone').innerText=phone; document.getElementById('tType').innerText=currentType; document.getElementById('tSeat').innerText=seat; document.getElementById('tTotal').innerText=total.toLocaleString();
+  document.getElementById('qrcode').innerHTML=''; new QRCode(document.getElementById('qrcode'),{text:`https://ik8-design.github.io/verify.html?id=${id}`,width:160,height:160});
   document.getElementById('ticketResult').style.display='block';
-  window._lastTicket={id,name,phone,total,match:document.getElementById('matchInfo').innerText};
+  window._last={id,name,phone,total,match:document.getElementById('matchInfo').innerText,seat};
+  window.scrollTo(0,document.body.scrollHeight);
 }
-window.sendWhatsApp = ()=>{
-  const t=window._lastTicket;
-  if(!t)return;
-  const msg=`🎫 JUBA STADIUM TICKET\nID: ${t.id}\nName: ${t.name}\nMatch: ${t.match}\nTotal: ${t.total.toLocaleString()} SSP\nSeat: ${document.getElementById('seat').value}`;
-  const url=`https://wa.me/${t.phone.replace(/^0/,'211')}?text=${encodeURIComponent(msg)}`;
-  window.open(url,'_blank');
-}
+window.sendWhatsApp=()=>{ const t=window._last; if(!t)return; const msg=`🎫 JUBA STADIUM\nID:${t.id}\nName:${t.name}\nMatch:${t.match}\nSeat:${t.seat}\nTotal:${t.total.toLocaleString()} SSP\nQR: https://ik8-design.github.io/verify.html?id=${t.id}`; const waPhone=t.phone.startsWith('0')?'211'+t.phone.substring(1):t.phone; window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`,'_blank'); }
+loadPrices();
 </script>
 </body>
-</html>
+  </html>
