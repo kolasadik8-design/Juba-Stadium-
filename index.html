@@ -51,6 +51,15 @@ table{width:100%;border-collapse:collapse} th{background:var(--blue);color:#fff;
 </div>
   <!-- 2- ISSUE TICKET HEADER - PLACE 1 -->
   <div class="card" style="flex:1;min-width:320px">
+    <div class="card no-print">
+  <h3>📋 Tickets List</h3>
+  <small id="myStats">0 tickets - 0 SSP</small>
+  <input id="search" placeholder="Search..." oninput="searchTickets()">
+  <table>
+    <thead><tr><th>ID</th><th>Name</th><th>Total</th><th>X</th></tr></thead>
+    <tbody id="ticketList"></tbody>
+  </table>
+    </div>
     <h3 id="issueTitle">Issue Ticket - <span id="branchLabel">all</span></h3>
     <div id="matchInfo" style="background:var(--blue);color:#fff;padding:10px;border-radius:10px;text-align:center">⚽ South Sudan vs Egypt - 26/09/2026 - Juba International Stadium</div>
     
