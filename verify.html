@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify Ticket - Juba Stadium</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+body{font-family:system-ui;background:#0a3a8a;margin:0;padding:16px;color:#fff;text-align:center}
+.card{background:#fff;color:#000;border-radius:16px;padding:16px;margin:12px auto;max-width:400px}
+#reader{width:100%;border-radius:12px;overflow:hidden}
+.ok{background:#0a8a2e;color:#fff;padding:12px;border-radius:10px}
+.bad{background:#c41e2d;color:#fff;padding:12px;border-radius:10px}
+.warn{background:#d4a71c;color:#000;padding:12px;border-radius:10px}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid #ccc;box-sizing:border-box;margin:8px 0}
+button{width:100%;padding:14px;border:0;border-radius:12px;font-weight:bold;cursor:pointer}
+</style>
+</head>
+<body>
+<h2>🎫 JUBA STADIUM - Ticket Verifier</h2>
+<p>Scan QR at gate</p>
+
+<div class="card">
+  <div id="reader"></div>
+  <input id="manualID" placeholder="Or enter Ticket ID e.g. JUBA-...">
+  <button style="background:#0a3a8a;color:#fff" onclick="verifyManual()">Verify ID</button>
+</div>
+
+<div class="card" id="resultCard" style="display:none">
+  <h3 id="resultStatus"></h3>
+  <div id="resultData" style="text-align:left"></div>
+  <button id="useBtn" style="background:#0a8a2e;color:#fff;margin-top:10px;display:none" onclick="markUsed()">✅ Confirm Entry - Mark as USED</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// نفس الكونفيق حق index.html
+const firebaseConfig = { 
+  apiKey: "YOUR_API_KEY", 
+  authDomain: "YOUR_DOMAIN", 
+  projectId: "YOUR_PROJECT_ID" 
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let currentDocId = null;
+let currentTicket = null;
+
+// يدعم رابط ?id=JUBA-xxx
+const urlId = new URLSearchParams(window.location.search).get('id');
+if(urlId){ setTimeout(()=>verifyTicket(urlId), 500); }
+
+async function verifyTicket(ticketId){
+  ticketId = ticketId.trim().toUpperCase();
+  if(!ticketId) return;
+  document.getElementById('manualID').value = ticketId;
+  
+  const q = query(collection(db,'juba_matches_tickets'), where('id','==',ticketId));
+  const snap = await getDocs(q);
+  
+  const card = document.getElementById('resultCard');
+  const status = document.getElementById('resultStatus');
+  const data = document.getElementById('resultData');
+  card.style.display='block';
+  
+  if(snap.empty){
+    status.innerHTML = '<div class="bad">❌ Ticket NOT FOUND - مزورة</div>';
+    data.innerHTML = `ID: ${ticketId} غير موجود في النظام`;
+    document.getElementById('useBtn').style.display='none';
+    return;
+  }
+  
+  const docSnap = snap.docs[0];
+  currentDocId = docSnap.id;
+  currentTicket = docSnap.data();
+  
+  if(currentTicket.used === true){
+    status.innerHTML = '<div class="bad">❌ USED BEFORE - مستخدمة قبل كده</div>';
+    data.innerHTML = `
+      <p><b>ID:</b> ${currentTicket.id}</p>
+      <p><b>Name:</b> ${currentTicket.name}</p>
+      <p><b>Phone:</b> ${currentTicket.phone}</p>
+      <p><b>Used At:</b> ${currentTicket.usedAt?.toDate ? currentTicket.usedAt.toDate().toLocaleString() : currentTicket.usedAt}</p>
+      <p style="color:red"><b>⚠️ لا تسمح بالدخول!</b></p>
+    `;
+    document.getElementById('useBtn').style.display='none';
+  } else {
+    status.innerHTML = '<div class="ok">✅ VALID TICKET - تذكرة صحيحة</div>';
+    data.innerHTML = `
+      <p><b>ID:</b> ${currentTicket.id}</p>
+      <p><b>Match:</b> ${currentTicket.match || 'South Sudan vs Egypt'}</p>
+      <p><b>Name:</b> ${currentTicket.name}</p>
+      <p><b>Phone:</b> ${currentTicket.phone}</p>
+      <p><b>Type:</b> ${currentTicket.type} / Seat: ${currentTicket.seat}</p>
+      <p><b>Total:</b> ${currentTicket.total?.toLocaleString()} SSP</p>
+      <p><b>Currency:</b> ${currentTicket.currency || 'SSP'}</p>
+    `;
+    document.getElementById('useBtn').style.display='block';
+  }
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
+window.verifyManual = ()=> verifyTicket(document.getElementById('manualID').value);
+window.markUsed = async ()=>{
+  if(!currentDocId) return;
+  if(!confirm(`تأكيد دخول ${currentTicket.name} ؟`)) return;
+  await updateDoc(doc(db,'juba_matches_tickets',currentDocId), {
+    used: true,
+    usedAt: new Date(),
+    checkedBy: JSON.parse(localStorage.getItem('juba_user')||'{}').username || 'gate'
+  });
+  document.getElementById('resultStatus').innerHTML = '<div class="warn">✅ ENTRY CONFIRMED - تم تسجيل الدخول</div>';
+  document.getElementById('useBtn').style.display='none';
+}
+
+// QR Scanner
+function onScanSuccess(decodedText){
+  // الرابط بيكون https://.../verify.html?id=JUBA-XXX
+  try{
+    const url = new URL(decodedText);
+    const id = url.searchParams.get('id');
+    if(id){ verifyTicket(id); return; }
+  }catch(e){}
+  verifyTicket(decodedText);
+}
+
+new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width:250, height:250} }, false).render(onScanSuccess);
+
+window.verifyTicket = verifyTicket;
+</script>
+</body>
+</html>
