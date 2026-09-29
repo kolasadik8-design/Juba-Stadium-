@@ -1,61 +1,182 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JUBA STADIUM • SSFA V17.0</title>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<style>
-:root{--bg:#070b1a;--card:#111b3d;--text:#eaf0ff;--gold:linear-gradient(90deg,#FFD700,#FFA500)}
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Tajawal}
-body{background:var(--bg);color:var(--text)}header{background:var(--card);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:20;border-bottom:1px solid #ffffff15}
-.card{background:var(--card);border:1px solid #ffffff12;border-radius:16px;padding:16px;margin:12px auto;max-width:900px}
-.btn{border:none;padding:11px 14px;border-radius:10px;font-weight:900;cursor:pointer}.btn.primary{background:#2d6bff;color:#fff}.btn.ghost{background:transparent;border:1px solid #ffffff25;color:var(--text)}.btn.gold{background:var(--gold);color:#000}.btn.green{background:#00c853;color:#fff;width:100%;display:block;text-align:center;text-decoration:none;margin-top:8px}
-input,select{width:100%;padding:11px;margin:6px 0;border-radius:10px;background:var(--bg);color:var(--text);border:1px solid #ffffff1f}
-.match-card{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #ffffff15;border-radius:14px;margin:8px 0;cursor:pointer}.match-card img{width:52px;height:52px;object-fit:contain;background:#fff;border-radius:50%;padding:4px}
-.badge{background:#1a2a5a;color:#fff;padding:4px 10px;border-radius:20px;font-size:11px}.ticket{border:2px dashed #FFD700;padding:18px;border-radius:16px;background:var(--card);text-align:center}.hidden{display:none!important}
-.gold-text{background:var(--gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
-#loginOverlay{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}.login-box{max-width:400px;width:100%;background:var(--card);padding:24px;border-radius:20px;border:1px solid #ffffff15;text-align:center}
-.upload-label{background:var(--bg);border:1px dashed #FFD700;padding:10px;border-radius:10px;cursor:pointer;text-align:center;flex:1;font-size:12px}
-@media print{body *{visibility:hidden}.ticket,.ticket *{visibility:visible}.ticket{position:absolute;left:0;top:0;width:100%}}
-</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juba Stadium - V18 Cashier System</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>body{font-family:system-ui} .hidden{display:none}</style>
 </head>
-<body>
-<header><div style="font-weight:900">🏟️ JUBA STADIUM • V17.0</div><div><button class="btn ghost" id="themeBtn">🌙</button><button class="btn ghost" id="devBtn">المطور</button></div></header>
-<div id="loginOverlay"><div class="login-box"><h2>دخول المطور</h2><p style="font-size:12px;color:#8aa0d0">JUBA STADIUM OFFICIAL</p><input id="devId" placeholder="ID"><input id="devPass" type="password" placeholder="Password"><button class="btn primary" id="loginDevBtn" style="width:100%;margin-top:8px">دخول</button><p id="loginMsg" style="color:#ff6b7a;font-size:12px"></p><a href="tel:0928813308" style="display:inline-block;margin-top:10px;background:var(--gold);color:#000;padding:10px 16px;border-radius:20px;font-weight:900;text-decoration:none">📞 Call our IT team 0928813308</a></div></div>
-<div class="card" id="publicView"><h3>المباريات القادمة</h3><div id="matchesList">Loading...</div><div id="ticketForm" class="hidden" style="margin-top:14px;border-top:1px solid #ffffff15;padding-top:12px"><h4 id="selTitle"></h4><select id="grade"><option value="VIP">VIP - 20,000 SSP</option><option value="SECOND">الثانية - 10,000</option><option value="THIRD">الثالثة - 5,000</option><option value="SEVEN_MILE">سبعة ميل - 2,000</option></select><input id="fanName" placeholder="اسم المشجع" maxlength="40"><input id="fanPhone" placeholder="092xxxxxxx" maxlength="10"><p id="phoneError" style="color:#ff6b7a;font-size:11px;display:none">رقم غير صالح</p><button class="btn gold" id="cutBtn" style="width:100%">قطع التذكرة 🎫</button></div><div id="ticketResult" class="hidden"></div></div>
-<div class="card hidden" id="devView"><h3>لوحة المطور - من ذاكرة الهاتف</h3><select id="compType"><option value="LOCAL">الدوري المحلي</option><option value="CAFCL">أبطال أفريقيا</option><option value="AFCON">تصفيات أفريقيا</option></select><input id="team1Name" placeholder="الفريق الأول" maxlength="30"><div style="display:flex;gap:8px;align-items:center"><label class="upload-label">📁 شعار 1<input type="file" id="team1File" accept="image/png,image/jpeg,image/webp" hidden></label><img id="prev1" style="width:44px;height:44px;border-radius:50%;display:none;background:#fff"></div><input id="team2Name" placeholder="الفريق الثاني" maxlength="30"><div style="display:flex;gap:8px;align-items:center"><label class="upload-label">📁 شعار 2<input type="file" id="team2File" accept="image/png,image/jpeg,image/webp" hidden></label><img id="prev2" style="width:44px;height:44px;border-radius:50%;display:none;background:#fff"></div><input id="matchDate" type="datetime-local"><button class="btn primary" id="addBtn" style="width:100%">حفظ ✅</button><div id="devList"></div><button class="btn ghost" id="backBtn" style="width:100%;margin-top:10px">رجوع</button></div>
-<script>
-// === الكونفق الجديد من صورتك ===
+<body class="bg-gray-900 text-white min-h-screen">
+<div id="loginPage" class="flex items-center justify-center min-h-screen p-4">
+<div class="bg-gray-800 p-8 rounded-2xl w-full max-w-md border border-gray-700">
+<h1 class="text-2xl font-bold text-center mb-2">🏟️ استاد جوبا</h1>
+<p class="text-center text-gray-400 mb-6 text-sm">V18 - نظام الموظفين المحمي</p>
+<div id="lockMsg" class="hidden bg-red-900/50 p-3 rounded mb-4 text-sm text-center"></div>
+<div id="loginAlert" class="hidden p-3 rounded mb-4 text-sm"></div>
+<label class="text-sm">اسم المستخدم</label>
+<input id="username" class="w-full p-3 rounded bg-gray-700 border border-gray-600 mb-4 text-left" dir="ltr" placeholder="ADMIN or employee">
+<label class="text-sm">كلمة السر</label>
+<input id="password" type="password" class="w-full p-3 rounded bg-gray-700 border border-gray-600 mb-4 text-left" dir="ltr" placeholder="••••••">
+<button onclick="doLogin()" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded font-bold">دخول 🔐</button>
+<p class="text-xs text-gray-500 mt-4 text-center">بعد 3 محاولات خاطئة - النظام يقفل 5 دقائق</p>
+</div></div>
+
+<div id="appPage" class="hidden">
+<header class="bg-gray-800 p-4 flex justify-between items-center border-b border-gray-700">
+<div><span id="userRoleBadge" class="text-xs bg-blue-600 px-2 py-1 rounded"></span> <span id="userNameDisplay" class="font-bold mr-2"></span></div>
+<button onclick="logout()" class="bg-red-600 px-4 py-1 rounded text-sm">خروج</button>
+</header>
+<div class="p-4 max-w-6xl mx-auto">
+<!-- Admin Panel -->
+<div id="adminPanel" class="hidden">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+<div class="bg-gray-800 p-4 rounded"><p class="text-xs text-gray-400">إجمالي دخل اليوم</p><p id="totalIncomeAll" class="text-2xl font-bold text-green-400">0 SDG</p></div>
+<div class="bg-gray-800 p-4 rounded"><p class="text-xs text-gray-400">عدد التذاكر المباعة</p><p id="totalTicketsAll" class="text-2xl font-bold">0</p></div>
+<div class="bg-gray-800 p-4 rounded"><p class="text-xs text-gray-400">عدد الموظفين</p><p id="totalEmployees" class="text-2xl font-bold">0</p></div>
+</div>
+
+<div class="bg-gray-800 p-4 rounded mb-6">
+<h3 class="font-bold mb-3">➕ إنشاء حساب موظف جديد</h3>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+<input id="newEmpName" placeholder="الاسم - مثال: Ahmed" class="p-2 rounded bg-gray-700">
+<input id="newEmpUser" placeholder="يوزر - ahmed1" class="p-2 rounded bg-gray-700 text-left" dir="ltr">
+<input id="newEmpPass" placeholder="باسورد - 1234" class="p-2 rounded bg-gray-700 text-left" dir="ltr">
+<button onclick="createEmployee()" class="bg-blue-600 rounded p-2 font-bold">إنشاء</button>
+</div></div>
+
+<div id="employeesReport" class="bg-gray-800 p-4 rounded mb-6"></div>
+<div id="matchesAdmin" class="bg-gray-800 p-4 rounded"></div>
+</div>
+<!-- End Admin Panel -->
+  <!-- Employee Panel -->
+<div id="employeePanel" class="hidden">
+<div class="grid grid-cols-3 gap-3 mb-6">
+<div class="bg-gray-800 p-3 rounded text-center"><p class="text-xs">VIP</p><p id="myVip" class="text-xl font-bold">0</p><p id="myVipIncome" class="text-xs text-green-400">0 SDG</p></div>
+<div class="bg-gray-800 p-3 rounded text-center"><p class="text-xs">جانبية</p><p id="mySide" class="text-xl font-bold">0</p><p id="mySideIncome" class="text-xs text-green-400">0 SDG</p></div>
+<div class="bg-gray-800 p-3 rounded text-center"><p class="text-xs">شعبية</p><p id="myPop" class="text-xl font-bold">0</p><p id="myPopIncome" class="text-xs text-green-400">0 SDG</p></div>
+</div>
+<div class="bg-blue-900/30 p-3 rounded mb-4 text-center"><p class="text-sm">إجمالي دخلي</p><p id="myTotalIncome" class="text-2xl font-bold text-green-400">0 SDG</p><p id="myTotalCount" class="text-xs">0 تذكرة</p></div>
+
+<div id="matchesList" class="space-y-3"></div>
+<div id="myTicketsList" class="mt-8 bg-gray-800 p-4 rounded"><h3 class="font-bold mb-3">🎟️ تذاكري التي قطعتها</h3><div id="myTickets"></div></div>
+</div>
+</div></div>
+
+<!-- Ticket Modal -->
+<div id="ticketModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+<div class="bg-white text-black p-6 rounded-2xl w-full max-w-sm text-center">
+<div id="qrcode" class="flex justify-center mb-3"></div>
+<p id="tInfo" class="text-sm"></p>
+<button onclick="document.getElementById('ticketModal').classList.add('hidden')" class="mt-4 bg-gray-800 text-white px-6 py-2 rounded w-full">إغلاق</button>
+</div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, getDoc, getDocs, addDoc, setDoc, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ============ ضع الـ CONFIG حقك هنا ============
 const firebaseConfig = {
-  apiKey: "AIzaSyB65erIbKPojeJCtvWCaUPNBqA_YQ6QGJ0",
-  authDomain: "juba-stadium-1ace0.firebaseapp.com",
-  projectId: "juba-stadium-1ace0",
-  storageBucket: "juba-stadium-1ace0.firebasestorage.app",
-  messagingSenderId: "299347484908",
-  appId: "1:299347484908:web:926e359973c26aa1f0c5c9"
+  apiKey: "AIzaSyA...ضع_حقك_هنا",
+  authDomain: "juba-stadium.firebaseapp.com",
+  projectId: "juba-stadium",
+  storageBucket: "juba-stadium.appspot.com",
+  messagingSenderId: "123456",
+  appId: "1:123:web:abc"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const esc=s=> (s||'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const isValidPhone=p=> /^09\d{8}$/.test(p);
-const isImageType=t=> ['image/png','image/jpeg','image/webp'].includes(t);
-let allMatches=[], selectedId=null, devLogged=false, logo1='', logo2='';
-document.getElementById('themeBtn').onclick=()=>{const c=document.documentElement.getAttribute('data-theme');document.documentElement.setAttribute('data-theme',c==='light'?'dark':'light');};
-document.getElementById('loginDevBtn').onclick=()=>{const id=document.getElementById('devId').value.trim(),p=document.getElementById('devPass').value;if((id==='ADMIN'&&p==='Juba@2026')||(id==='SSFA'&&p==='0928813308')){devLogged=true;document.getElementById('loginOverlay').style.display='none';loadMatches();}else document.getElementById('loginMsg').textContent='خطأ';};
-document.getElementById('devBtn').onclick=()=>{if(!devLogged){document.getElementById('loginOverlay').style.display='flex';return;}document.getElementById('publicView').classList.add('hidden');document.getElementById('devView').classList.remove('hidden');loadDev();};
-document.getElementById('backBtn').onclick=()=>{document.getElementById('devView').classList.add('hidden');document.getElementById('publicView').classList.remove('hidden');};
-document.getElementById('team1File').onchange=e=>{const f=e.target.files[0];if(!f||!isImageType(f.type)||f.size>400*1024)return alert('صورة غير صالحة >400KB');const r=new FileReader();r.onload=()=>{logo1=r.result;document.getElementById('prev1').src=r.result;document.getElementById('prev1').style.display='block';};r.readAsDataURL(f);};
-document.getElementById('team2File').onchange=e=>{const f=e.target.files[0];if(!f||!isImageType(f.type)||f.size>400*1024)return alert('صورة غير صالحة');const r=new FileReader();r.onload=()=>{logo2=r.result;document.getElementById('prev2').src=r.result;document.getElementById('prev2').style.display='block';};r.readAsDataURL(f);};
-document.getElementById('addBtn').onclick=async()=>{const t1=document.getElementById('team1Name').value.trim(),t2=document.getElementById('team2Name').value.trim(),comp=document.getElementById('compType').value,date=document.getElementById('matchDate').value;if(!t1||!t2||!date||!logo1||!logo2)return alert('املأ البيانات + الشعارين من الهاتف');await db.collection('juba_matches').add({team1:t1,team1Logo:logo1,team2:t2,team2Logo:logo2,competition:comp,date,created:Date.now()});alert('تم ✅');logo1='';logo2='';loadMatches();loadDev();};
-async function loadMatches(){const snap=await db.collection('juba_matches').orderBy('created','desc').get();allMatches=[];snap.forEach(d=>allMatches.push({id:d.id,...d.data()}));let h='';allMatches.forEach(m=>{h+=`<div class="match-card" onclick="selectMatch('${m.id}')"><img src="${m.team1Logo}"><div style="flex:1"><b>${esc(m.team1)} vs ${esc(m.team2)}</b><br><span class="badge">${esc(m.competition)}</span> <span style="font-size:11px">${esc(m.date)}</span></div><img src="${m.team2Logo}"></div>`;});document.getElementById('matchesList').innerHTML=h||'لا يوجد مباريات - أضف من لوحة المطور';}
-async function loadDev(){const snap=await db.collection('juba_matches').orderBy('created','desc').get();let h='';snap.forEach(d=>{h+=`<div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #ffffff10"><span>${esc(d.data().team1)} vs ${esc(d.data().team2)}</span><button class="btn ghost" onclick="delMatch('${d.id}')">مسح</button></div>`;});document.getElementById('devList').innerHTML=h;}
-window.delMatch=async id=>{if(confirm('مسح؟')){await db.collection('juba_matches').doc(id).delete();loadMatches();loadDev();}};
-window.selectMatch=id=>{selectedId=id;const m=allMatches.find(x=>x.id===id);document.getElementById('selTitle').textContent=m.team1+' vs '+m.team2;document.getElementById('ticketForm').classList.remove('hidden');};
-document.getElementById('cutBtn').onclick=async()=>{const name=document.getElementById('fanName').value.trim(),phone=document.getElementById('fanPhone').value.trim(),grade=document.getElementById('grade').value;if(!isValidPhone(phone)){document.getElementById('phoneError').style.display='block';return;}document.getElementById('phoneError').style.display='none';if(!name||!selectedId)return alert('املأ البيانات');const m=allMatches.find(x=>x.id===selectedId);const tid='JUBA-'+Date.now().toString().slice(-8);const data={ticketId:tid,mId:selectedId,team1:m.team1,team2:m.team2,competition:m.competition,grade,date:m.date,fanName:esc(name),fanPhone:phone,created:Date.now(),used:false};await db.collection('juba_tickets').doc(tid).set(data);showTicket(data,m);};
-function showTicket(t,m){const waText=encodeURIComponent(`🏟️ تذكرتك - استاد جوبا\n${m.team1} vs ${m.team2}\n${t.grade}\nID:${t.ticketId}\n${m.date}`);const waLink=`https://wa.me/211${t.fanPhone.slice(1)}?text=${waText}`;const div=document.getElementById('ticketResult');div.classList.remove('hidden');div.innerHTML=`<div class="ticket"><h3 class="gold-text">JUBA STADIUM TICKET</h3><div style="display:flex;justify-content:center;gap:16px;margin:12px 0"><img src="${m.team1Logo}" style="width:60px;height:60px;background:#fff;border-radius:50%"><b>VS</b><img src="${m.team2Logo}" style="width:60px;height:60px;background:#fff;border-radius:50%"></div><h4>${esc(m.team1)} vs ${esc(m.team2)}</h4><p>${esc(m.competition)} - ${esc(m.date)}</p><p>${esc(t.grade)} | ${esc(t.fanName)}</p><div id="qrcode" style="display:flex;justify-content:center;margin:12px 0"></div><p style="font-size:11px">ID:${esc(t.ticketId)}</p><button class="btn gold" onclick="window.print()" style="width:100%">🖨️ طباعة</button><a href="${waLink}" target="_blank" class="btn green">💬 واتساب</a><a href="tel:0928813308" style="display:block;margin-top:8px;color:#FFD700;font-weight:900;text-decoration:none">📞 Call our IT team 0928813308</a></div>`;new QRCode(document.getElementById("qrcode"),{text:t.ticketId,width:150,height:150});}
-loadMatches();
+// لو ما عارف، انسخو من ملفك القديم أو من Firebase Console > Project Settings
+// =============================================
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let currentUser = null;
+const MAX_ATTEMPTS = 3; const LOCK_MS = 5*60*1000;
+
+function isLocked(u){
+  const k='lock_'+u; const d=JSON.parse(localStorage.getItem(k)||'{}');
+  if(d.until && Date.now()<d.until) return {locked:true, remain:Math.ceil((d.until-Date.now())/1000)};
+  return {locked:false};
+}
+function recordFail(u){
+  const k='attempt_'+u; let c=parseInt(localStorage.getItem(k)||'0')+1;
+  localStorage.setItem(k,c); if(c>=MAX_ATTEMPTS){
+    localStorage.setItem('lock_'+u, JSON.stringify({until:Date.now()+LOCK_MS}));
+    localStorage.removeItem(k);
+  }
+}
+function clearFail(u){ localStorage.removeItem('attempt_'+u); localStorage.removeItem('lock_'+u); }
+
+window.doLogin = async function(){
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value.trim();
+  const alertBox=document.getElementById('loginAlert');
+  const lockBox=document.getElementById('lockMsg');
+  if(!u||!p){ alertBox.className='bg-yellow-900/50 p-3 rounded mb-4 text-sm text-center'; alertBox.textContent='اكتب اليوزر والباسورد'; alertBox.classList.remove('hidden'); return; }
+  const lk=isLocked(u); if(lk.locked){ lockBox.textContent=`مقفول بسبب محاولات كتيرة - حاول بعد ${lk.remain} ثانية`; lockBox.classList.remove('hidden'); return; } else lockBox.classList.add('hidden');
+
+  try{
+    // جرب collection الصغيرة والكبيرة
+    let userDoc=null; for(let col of ['juba_users','Juba_users']){
+      let s=await getDoc(doc(db,col,u)); if(s.exists()){ userDoc=s.data(); break; }
+      let q=query(collection(db,col), where("username","==",u)); let qs=await getDocs(q); if(!qs.empty){ userDoc=qs.docs[0].data(); break; }
+    }
+    if(!userDoc || userDoc.pass!==p){ recordFail(u); alertBox.className='bg-red-900/50 p-3 rounded mb-4 text-sm text-center'; alertBox.textContent=`يوزر أو باسورد غلط - محاولة ${localStorage.getItem('attempt_'+u)||1}/${MAX_ATTEMPTS}`; alertBox.classList.remove('hidden'); return; }
+    clearFail(u); currentUser={id:u,...userDoc}; localStorage.setItem('juba_session',JSON.stringify(currentUser));
+    showApp();
+  }catch(e){ alertBox.textContent='خطأ: '+e.message; alertBox.classList.remove('hidden'); }
+}
+
+function showApp(){
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('appPage').classList.remove('hidden');
+  document.getElementById('userNameDisplay').textContent=currentUser.name||currentUser.username;
+  document.getElementById('userRoleBadge').textContent=currentUser.role==='admin'?'المدير العام':'موظف';
+  if(currentUser.role==='admin'){ document.getElementById('adminPanel').classList.remove('hidden'); loadAdmin(); }
+  else { document.getElementById('employeePanel').classList.remove('hidden'); loadEmployee(); }
+}
+window.logout=function(){ localStorage.removeItem('juba_session'); location.reload(); }
+  async function loadAdmin(){
+  let users=await getDocs(collection(db,'Juba_users')); if(users.empty) users=await getDocs(collection(db,'juba_users'));
+  document.getElementById('totalEmployees').textContent=users.size;
+  let tickets=await getDocs(collection(db,'juba_tickets')); let allT=[...tickets.docs]; try{ let t2=await getDocs(collection(db,'juba_tickets')); }catch{}
+  let total=0; let report={};
+  allT.forEach(d=>{ let x=d.data(); total+=(x.price||0); let who=x.soldBy||'غير معروف'; if(!report[who]) report[who]={vip:0,side:0,pop:0,income:0,name:x.soldByName||who}; if(x.grade==='vip') report[who].vip++; else if(x.grade==='side') report[who].side++; else report[who].pop++; report[who].income+=(x.price||0); });
+  document.getElementById('totalIncomeAll').textContent=total+' SDG'; document.getElementById('totalTicketsAll').textContent=allT.length;
+  let html='<h3 class="font-bold mb-3">📊 تقرير الموظفين</h3><div class="space-y-2">'; Object.keys(report).forEach(k=>{ let r=report[k]; html+=`<div class="bg-gray-700 p-3 rounded flex justify-between text-sm"><div><b>${r.name}</b> (${k})<br><span class="text-xs">VIP:${r.vip} جانبية:${r.side} شعبية:${r.pop}</span></div><div class="text-left"><b class="text-green-400">${r.income} SDG</b><br><span class="text-xs">${r.vip+r.side+r.pop} تذكرة</span></div></div>`; }); html+='</div>'; document.getElementById('employeesReport').innerHTML=html;
+  loadMatches(true);
+}
+async function loadEmployee(){ loadMatches(false); loadMyTickets(); }
+async function loadMatches(isAdmin){
+  let ms=await getDocs(query(collection(db,'juba_matches'), orderBy('createdAt','desc'))); if(ms.empty) ms=await getDocs(collection(db,'Juba_users'));
+  let cont=document.getElementById(isAdmin?'matchesAdmin':'matchesList'); cont.innerHTML='<h3 class="font-bold mb-3">⚽ المباريات</h3>';
+  // fallback if no matches collection
+  try{ let snap=await getDocs(collection(db,'juba_matches')); if(snap.empty) snap=await getDocs(collection(db,'Juba_matches')); snap.forEach(d=>{ let m=d.data(); cont.innerHTML+=`<div class="bg-gray-700 p-3 rounded flex justify-between items-center mb-2"><div><b>${m.team1||m.home} vs ${m.team2||m.away}</b><br><span class="text-xs text-gray-400">${m.date||''}</span></div><button onclick="cutTicket('${d.id}',${m.vipPrice||1000},${m.sidePrice||500},${m.popPrice||200})" class="bg-green-600 px-3 py-1 rounded text-sm">قطع تذكرة</button></div>`; }); }catch{ cont.innerHTML+='<p class="text-xs text-gray-400">لا توجد مباريات - أنشئ من لوحة المدير القديمة gate.html</p>'; }
+}
+window.cutTicket=function(matchId,vipP,sideP,popP){
+  let grade=prompt('اكتب الدرجة: vip / side / pop','pop'); if(!grade) return; let price=grade==='vip'?vipP:grade==='side'?sideP:popP;
+  let buyer=prompt('اسم الجمهور؟'); if(!buyer) return;
+  addDoc(collection(db,'juba_tickets'),{matchId,grade,price,buyerName:buyer,soldBy:currentUser.id||currentUser.username,soldByName:currentUser.name,createdAt:serverTimestamp(),used:false}).then(docRef=>{
+    document.getElementById('qrcode').innerHTML=''; new QRCode(document.getElementById('qrcode'),{text:docRef.id,width:150,height:150});
+    document.getElementById('tInfo').innerHTML=`<b>${buyer}</b><br>${grade.toUpperCase()} - ${price} SDG<br>بواسطة: ${currentUser.name}<br><small>${docRef.id}</small>`; document.getElementById('ticketModal').classList.remove('hidden'); if(currentUser.role!=='admin') loadMyTickets();
+  });
+}
+async function loadMyTickets(){
+  let q=query(collection(db,'juba_tickets'), where('soldBy','==',currentUser.id||currentUser.username)); let snap=await getDocs(q);
+  let vip=0,side=0,pop=0,inc=0; let html='';
+  snap.forEach(d=>{ let t=d.data(); inc+=t.price||0; if(t.grade==='vip') vip++; else if(t.grade==='side') side++; else pop++; html+=`<div class="bg-gray-700 p-2 rounded mb-1 text-xs flex justify-between"><span>${t.buyerName} - ${t.grade}</span><span class="text-green-400">${t.price} SDG</span></div>`; });
+  document.getElementById('myVip').textContent=vip; document.getElementById('mySide').textContent=side; document.getElementById('myPop').textContent=pop;
+  document.getElementById('myVipIncome').textContent=vip*1000+' SDG'; document.getElementById('myTotalIncome').textContent=inc+' SDG'; document.getElementById('myTotalCount').textContent=snap.size+' تذكرة';
+  document.getElementById('myTickets').innerHTML=html||'لم تقطع أي تذكرة بعد';
+}
+window.createEmployee=async function(){
+  let name=document.getElementById('newEmpName').value.trim(); let user=document.getElementById('newEmpUser').value.trim(); let pass=document.getElementById('newEmpPass').value.trim();
+  if(!name||!user||!pass){ alert('املأ كل الحقول'); return; }
+  try{ await setDoc(doc(db,'Juba_users',user),{username:user,pass:pass,role:'employee',name:name,createdAt:serverTimestamp()}); alert('تم إنشاء الموظف: '+name); document.getElementById('newEmpName').value=''; document.getElementById('newEmpUser').value=''; document.getElementById('newEmpPass').value=''; loadAdmin(); }catch(e){ alert('خطأ: '+e.message); }
+}
+// auto login
+let sess=localStorage.getItem('juba_session'); if(sess){ try{ currentUser=JSON.parse(sess); showApp(); }catch{} }
 </script>
 </body>
 </html>
