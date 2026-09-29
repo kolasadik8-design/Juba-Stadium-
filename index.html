@@ -81,9 +81,14 @@ table{width:100%;border-collapse:collapse} th{background:var(--blue);color:#fff;
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = { /* حط الكونفيق حقك هنا */ };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const firebaseConfig = {
+  apiKey: "AIzaSyB65erIbKPojeJCtvWCaUPNBqA_YQ6QGJ0",
+  authDomain: "juba-stadium-1ace0.firebaseapp.com",
+  projectId: "juba-stadium-1ace0",
+  storageBucket: "juba-stadium-1ace0.firebasestorage.app",
+  messagingSenderId: "299347484908",
+  appId: "1:299347484908:web:926e359973c26aa1f0c5c9"
+};
 
 let currentType='VIP', currentPrice=50000, currentBranch='all';
 
