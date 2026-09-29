@@ -1,17 +1,95 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#0033a0"><title>GATE - JUBA Stadium</title><link rel="manifest" href="./manifest.json"><link rel="icon" href="./logo.png"><style>body{margin:0;font-family:system-ui;background:#111;color:#fff}.top{background:#0033a0;padding:10px;display:flex;justify-content:space-between;align-items:center}.card{background:#222;border-radius:14px;padding:14px;margin:10px}.input{width:100%;padding:12px;border-radius:10px;border:none;margin:6px 0;font-size:16px}button{padding:12px;border:none;border-radius:10px;font-weight:900;cursor:pointer;width:100%;margin:4px 0}.valid{background:#078930;color:#fff;font-size:22px;padding:20px;border-radius:14px;text-align:center}.invalid{background:#c41e3a;color:#fff;font-size:22px;padding:20px;border-radius:14px;text-align:center}.hidden{display:none!important}.login{max-width:360px;margin:60px auto;background:#222;padding:20px;border-radius:20px;text-align:center}</style></head><body>
-<div class="top"><b>🚪 GATE SCANNER V15.3</b><span id="who"></span><button onclick="logout()" style="width:auto;background:#a00;padding:5px 10px">Logout</button></div>
-<div id="loginBox" class="login"><img src="./logo.png" width="80" style="border-radius:50%;background:#fff;padding:3px"><h3>JUBA GATE</h3><input id="lu" class="input" placeholder="Username"><input id="lp" class="input" type="password" placeholder="Password"><button style="background:#0033a0;color:#fff" onclick="doLogin()">Login</button><p id="lmsg" style="color:#f66"></p></div>
-<div id="app" class="hidden" style="max-width:500px;margin:auto"><div class="card"><b>Scan Ticket</b><input id="scanId" class="input" placeholder="Enter Ticket ID or Scan QR" oninput="check()"><button style="background:#d4af37;color:#000" onclick="check()">🔍 CHECK TICKET</button><div id="result" style="margin-top:12px"></div><button id="allowBtn" class="hidden" style="background:#078930" onclick="allow()">✅ ALLOW ENTRY</button></div><div class="card" style="font-size:11px"><b>Today Stats</b><div id="stats"></div><button onclick="renderStats()" style="background:#444;margin-top:8px">Refresh Stats</button></div></div>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gate Check - JUBA STADIUM V16.1</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+:root{--bg:#070b1a;--card:#111b3d;--text:#eaf0ff;--muted:#8aa0d0}
+[data-theme="light"]{--bg:#f4f6ff;--card:#fff;--text:#0a1430;--muted:#5a6a90}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Tajawal}
+body{background:var(--bg);color:var(--text);transition:.3s}
+header{background:var(--card);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ffffff15}
+.card{background:var(--card);border:1px solid #ffffff12;border-radius:16px;padding:16px;margin:12px auto;max-width:520px}
+.btn{background:#2d6bff;color:#fff;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:800}
+.btn.ghost{background:transparent;border:1px solid #ffffff25;color:var(--text)}
+.gold-text{background:linear-gradient(90deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
+.hidden{display:none}
+.call-btn{display:inline-flex;gap:6px;background:linear-gradient(90deg,#FFD700,#FFA500);color:#000;padding:8px 14px;border-radius:20px;font-weight:900;font-size:12px;text-decoration:none;cursor:pointer}
+#loginOverlay{position:fixed;inset:0;background:var(--bg);z-index:99;display:flex;align-items:center;justify-content:center;padding:16px}
+.login-box{max-width:380px;width:100%;background:var(--card);padding:24px;border-radius:20px;border:1px solid #ffffff15;text-align:center}
+</style>
+</head>
+<body>
+<header>
+<div style="font-weight:900">🏟️ GATE CHECK</div>
+<div><button class="btn ghost small" id="themeBtn">🌙</button> <button class="btn ghost small" id="langBtn">EN</button></div>
+</header>
+
+<div id="loginOverlay">
+<div class="login-box">
+<h2 id="loginTitle">دخول البوابة / Gate Login</h2>
+<input id="gateId" placeholder="ID"><input id="gatePass" type="password" placeholder="Password">
+<button class="btn" id="loginBtn" style="width:100%;margin-top:8px">دخول / Login</button>
+<p id="loginMsg" style="color:#ff6b7a;font-size:12px;margin-top:8px"></p>
+<a class="call-btn" id="callITBtn">📞 Call our IT team</a>
+<p id="phoneReveal" class="hidden" style="margin-top:8px"><a href="tel:0928813308" style="color:#FFD700;font-weight:900;text-decoration:none">0928813308 - اضغط للاتصال</a></p>
+</div>
+</div>
+
+<div class="card">
+<h3 id="scanTitle">فحص التذاكر - امسح الـ QR</h3>
+<div id="reader" style="width:100%;border-radius:12px;overflow:hidden"></div>
+<div id="result" style="margin-top:14px;padding:12px;border-radius:12px;background:var(--bg);min-height:60px"></div>
+<button class="btn ghost" id="resetBtn" style="width:100%;margin-top:10px">فحص تذكرة جديدة / Scan New</button>
+<p class="gold-text" style="text-align:center;margin-top:12px">Call our team 0928813308</p>
+</div>
+
 <script>
-const PEPPER='SSFA-PEPPER-2026-HARD-9X7!';const HMAC_KEY='SSFA-HMAC-KEY-V15-3-!@#';async function sha256(s){const b=new TextEncoder().encode(s);const h=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('');}async function hashSecure(s){return (await sha256(s+PEPPER)).slice(0,16).toUpperCase();}async function hmac(d){return await sha256(d+HMAC_KEY+PEPPER);}async function signSecure(id){const h1=await sha256(id+'JUBA-S1-'+PEPPER);const h2=await sha256(id+'JUBA-S2-'+PEPPER+h1);return {s1:h1.slice(0,8).toUpperCase(),s2:h2.slice(0,8).toUpperCase()};}
-async function secureGet(k){let raw=localStorage.getItem(k);if(!raw)return null;try{let o=JSON.parse(raw);let calc=await hmac(JSON.stringify(o.d));if(calc!==o.h)return null;return o.d;}catch(e){return null;}}async function secureSet(k,data){let sig=await hmac(JSON.stringify(data));localStorage.setItem(k,JSON.stringify({d:data,h:sig}));}
-let admins=[],tickets=[],cur=null,lastChecked=null;
-async function load(){let a=await secureGet('juba_admins_v15_3_secure');admins=a||[];let t=await secureGet('juba_tickets_v15_3_secure');tickets=t||[];}
-(async()=>{await load();let sess=JSON.parse(sessionStorage.getItem('session_gate_v15_3')||'null');if(sess&&Date.now()<sess.exp){let ad=admins.find(x=>x.u===sess.u);if(ad){cur=ad;document.getElementById('loginBox').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('who').textContent=ad.u+' ('+ad.branch+')';renderStats();}}}})();
-async function doLogin(){let u=document.getElementById('lu').value.trim().toLowerCase(),p=document.getElementById('lp').value;let hp=await hashSecure(p+PEPPER);let a=admins.find(x=>x.u.toLowerCase()===u&&x.p===hp);if(!a){document.getElementById('lmsg').textContent='Invalid';return;}cur=a;sessionStorage.setItem('session_gate_v15_3',JSON.stringify({u:a.u,exp:Date.now()+12*60*60*1000}));document.getElementById('loginBox').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('who').textContent=a.u+' ('+a.branch+')';renderStats();}
-function logout(){sessionStorage.removeItem('session_gate_v15_3');location.reload();}
-async function check(){let id=document.getElementById('scanId').value.trim().toUpperCase().replace(/[^A-Z0-9\-]/g,'');if(id.length<5){document.getElementById('result').innerHTML='';return;}let t=tickets.find(x=>x.id===id||x.id.endsWith(id.slice(-8)));let res=document.getElementById('result');let btn=document.getElementById('allowBtn');if(!t){res.innerHTML='<div class=invalid>❌ NOT FOUND<br><small>Ticket not in system</small></div>';btn.classList.add('hidden');lastChecked=null;return;}let sigs=await signSecure(t.id);if(sigs.s1!==t.sig||sigs.s2!==t.sig2){res.innerHTML='<div class=invalid>❌ FORGED TICKET<br><small>Signature mismatch - FAKE!</small></div>';btn.classList.add('hidden');lastChecked=null;return;}if(t.cancelled){res.innerHTML='<div class=invalid>❌ CANCELLED<br><small>By '+t.cancelledBy+'</small></div>';btn.classList.add('hidden');lastChecked=null;return;}if(t.used){res.innerHTML='<div class=invalid>❌ ALREADY USED<br><small>Used at '+new Date(t.usedAt).toLocaleString()+'<br>Gate: '+t.usedGate+'</small></div>';btn.classList.add('hidden');lastChecked=null;return;}lastChecked=t;res.innerHTML='<div class=valid>✅ VALID TICKET<br><b>'+t.fan+'</b><br>'+t.tier.toUpperCase()+' - '+t.num+' seat(s)<br>'+t.seats.join(', ')+'<br>Match: '+t.match.teamA+' vs '+t.match.teamB+'<br>ID: '+t.id.slice(-12)+'</div>';btn.classList.remove('hidden');}
-async function allow(){if(!lastChecked)return;let idx=tickets.findIndex(x=>x.id===lastChecked.id);if(idx<0)return;tickets[idx].used=true;tickets[idx].usedAt=new Date().toISOString();tickets[idx].usedGate=cur.u+'/'+cur.branch;await secureSet('juba_tickets_v15_3_secure',tickets);document.getElementById('result').innerHTML='<div class=valid>✅ ENTRY ALLOWED<br>Welcome '+tickets[idx].fan+'</div>';document.getElementById('allowBtn').classList.add('hidden');document.getElementById('scanId').value='';lastChecked=null;renderStats();}
-async function renderStats(){await load();let today=new Date().toDateString();let usedToday=tickets.filter(x=>x.used&&new Date(x.usedAt).toDateString()===today);let valid=tickets.filter(x=>!x.cancelled&&!x.used);document.getElementById('stats').innerHTML='Total Tickets: '+tickets.filter(x=>!x.cancelled).length+'<br>Valid (not used): '+valid.length+'<br>Used Today: '+usedToday.length+'<br>Cancelled: '+tickets.filter(x=>x.cancelled).length;}
-</script></body></html>
+const firebaseConfig={apiKey:"AIzaSyDbPsfTygtodq8THsbSNZ4y2UTO0qHgr_4",authDomain:"ssnps-police-app-7018f.firebaseapp.com",projectId:"ssnps-police-app-7018f",storageBucket:"ssnps-police-app-7018f.firebasestorage.app",messagingSenderId:"705275454318",appId:"1:705275454318:web:a3cb76139563b6c33d977f"};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+const esc=s=> (s||'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+let lang='ar', logged=false, scanner=null;
+
+document.getElementById('themeBtn').onclick=()=>{const cur=document.documentElement.getAttribute('data-theme'); document.documentElement.setAttribute('data-theme',cur==='light'?'dark':'light');};
+document.getElementById('langBtn').onclick=()=>{
+ lang=lang==='ar'?'en':'ar'; document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+ document.getElementById('loginTitle').textContent=lang==='ar'?'دخول البوابة':'Gate Login';
+ document.getElementById('scanTitle').textContent=lang==='ar'?'فحص التذاكر - امسح الـ QR':'Scan Ticket QR';
+ document.getElementById('langBtn').textContent=lang==='ar'?'EN':'عربي';
+};
+document.getElementById('callITBtn').onclick=(e)=>{
+ e.preventDefault();
+ document.getElementById('phoneReveal').classList.toggle('hidden');
+ window.location.href='tel:0928813308';
+};
+document.getElementById('loginBtn').onclick=()=>{
+ const id=document.getElementById('gateId').value.trim(); const pass=document.getElementById('gatePass').value.trim();
+ if((id==='GATE'&&pass==='Gate@2026')||(id==='ADMIN'&&pass==='Juba@2026')){
+  logged=true; document.getElementById('loginOverlay').style.display='none'; startScanner();
+ } else document.getElementById('loginMsg').textContent='خطأ / Wrong';
+};
+
+function startScanner(){
+ if(scanner) return;
+ scanner=new Html5QrcodeScanner("reader",{fps:10,qrbox:250});
+ scanner.render(onScanSuccess);
+}
+function onScanSuccess(text){
+ if(!logged) return;
+ db.collection('juba_tickets').doc(text).get().then(doc=>{
+  if(!doc.exists){document.getElementById('result').innerHTML='<b style="color:#ff3b5c">❌ تذكرة غير موجودة / Invalid Ticket<br>'+esc(text)+'</b>'; return;}
+  const t=doc.data();
+  if(t.used){document.getElementById('result').innerHTML='<b style="color:orange">⚠️ مستخدمة من قبل / Already Used<br>'+esc(t.fanName)+' - '+esc(t.grade)+' - '+esc(t.team1)+' vs '+esc(t.team2)+'</b>'; return;}
+  document.getElementById('result').innerHTML='<b style="color:#00ff88">✅ صالحة / VALID<br>'+esc(t.team1)+' vs '+esc(t.team2)+'<br>'+esc(t.competition)+' - '+esc(t.grade)+'<br>المشجع: '+esc(t.fanName)+' - '+esc(t.fanPhone)+'</b>';
+  db.collection('juba_tickets').doc(text).update({used:true,usedAt:Date.now(),checkedBy:'GATE'});
+ });
+}
+document.getElementById('resetBtn').onclick=()=>{document.getElementById('result').innerHTML='';};
+</script>
+</body>
+                                                                                                                                                                             </html>
