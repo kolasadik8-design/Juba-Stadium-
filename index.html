@@ -36,6 +36,19 @@ table{width:100%;border-collapse:collapse} th{background:var(--blue);color:#fff;
 </div>
 
 <div style="display:flex;flex-wrap:wrap">
+  <!-- TEAM LOGOS UPLOAD -->
+<div style="display:flex;gap:10px;margin-bottom:12px">
+  <div style="flex:1;text-align:center">
+    <label style="font-weight:bold">شعار الفريق 1</label>
+    <input type="file" id="logo1Input" accept="image/*" onchange="uploadLogo(this, 'logo1')">
+    <img id="logo1Preview" style="width:60px;height:60px;object-fit:contain;margin-top:6px;border-radius:8px;background:#fff;display:none">
+  </div>
+  <div style="flex:1;text-align:center">
+    <label style="font-weight:bold">شعار الفريق 2</label>
+    <input type="file" id="logo2Input" accept="image/*" onchange="uploadLogo(this, 'logo2')">
+    <img id="logo2Preview" style="width:60px;height:60px;object-fit:contain;margin-top:6px;border-radius:8px;background:#fff;display:none">
+  </div>
+</div>
   <!-- 2- ISSUE TICKET HEADER - PLACE 1 -->
   <div class="card" style="flex:1;min-width:320px">
     <h3 id="issueTitle">Issue Ticket - <span id="branchLabel">all</span></h3>
