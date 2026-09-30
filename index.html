@@ -1,171 +1,135 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JUBA NATIONAL STADIUM - Ticketing</title>
-<link rel="manifest" href="manifest.json">
+<title>JUBA NATIONAL STADIUM</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-:root{--blue:#1e5bff;--red:#ff2d2d;--green:#00c950;--yellow:#ffcc00;--bg:#070a14;--card:#12172a;--line:#1f2742}
-*{box-sizing:border-box;font-family:Inter,sans-serif}body{margin:0;background:var(--bg);color:#fff}
-header{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:#0a0e1f;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
-.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;cursor:pointer}
-.logo b{color:var(--yellow)}nav{display:flex;gap:22px;font-size:13px;font-weight:600;opacity:.8}
-nav span.active{color:var(--yellow);border-bottom:2px solid var(--yellow);padding-bottom:4px}
-.hero{padding:28px 22px;background:radial-gradient(800px 300px at 20% 10%,#1a2350 0,#070a14 70%)}
-.hero h1{font-size:38px;margin:0 0 10px;line-height:1.1}
-.hero p{opacity:.7;max-width:520px;font-size:14px}
-.btns{margin-top:16px;display:flex;gap:12px}
-.btn{padding:12px 22px;border-radius:28px;border:0;font-weight:700;cursor:pointer}
-.btn-blue{background:var(--blue);color:#fff}.btn-green{background:transparent;border:1px solid var(--green);color:var(--green)}
-.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;padding:18px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;position:relative;overflow:hidden}
-.card-top{height:6px;display:flex}.card-top div{flex:1}
-.status{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}
-.up{background:var(--green)}.used{background:var(--red)}
-.qr{background:#fff;padding:8px;border-radius:10px;display:inline-block}
-.sec{padding:0 22px 22px}
-.match-row{display:flex;justify-content:space-between;align-items:center;background:#12172a;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px}
-.buy{background:var(--yellow);color:#000;border:0;border-radius:20px;padding:8px 16px;font-weight:800;cursor:pointer}
-input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#0d1226;color:#fff;margin-top:8px}
-.login-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:99}
-.login-box{background:#12172a;border:1px solid var(--line);padding:22px;border-radius:18px;width:90%;max-width:380px}
-.gate-tag{background:#1e2a55;color:#7aa2ff;padding:3px 8px;border-radius:6px;font-size:11px}
-@media(max-width:800px){.grid{grid-template-columns:1fr}nav{display:none}.hero h1{font-size:28px}}
+:root{--b:#1e5bff;--y:#ffcc00;--g:#00c950;--bg:#070a14;--c:#12172a;--l:#1f2742}
+*{box-sizing:border-box;font-family:Inter,system-ui}body{margin:0;background:var(--bg);color:#fff}
+header{display:flex;justify-content:space-between;padding:12px 16px;background:#0a0e1f;border-bottom:1px solid var(--l);position:sticky;top:0;z-index:30}
+.card{background:var(--c);border:1px solid var(--l);border-radius:16px;padding:14px;margin:12px}
+.teams{display:flex;justify-content:space-between;align-items:center}
+.teams img{width:60px;height:60px;background:#fff;border-radius:12px;padding:6px;object-fit:contain}
+input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--l);background:#0d1226;color:#fff;margin-top:7px}
+.btn{padding:12px;border-radius:12px;border:0;font-weight:800;cursor:pointer}
+.btn-b{background:var(--b);color:#fff}.btn-y{background:var(--y);color:#000}.btn-g{background:var(--g);color:#000}
+.grid{display:grid;grid-template-columns:1.2fr.8fr;gap:12px}
+.dash{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.dash div{background:#0d1226;border:1px solid var(--l);border-radius:12px;padding:12px;text-align:center}
+.admin{display:none;background:#fffbe0;color:#000;border-radius:16px;padding:12px;margin:12px;border:2px dashed #c8a200}
+.login{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:99}
+.login-box{background:var(--c);padding:18px;border-radius:16px;width:92%;max-width:400px;border:1px solid var(--l)}
+@media(max-width:850px){.grid,.dash{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header>
-<div class="logo" id="secretLogo">🛡️ JUBA NATIONAL STADIUM <b>TICKETING</b></div>
-<nav><span>MATCHES</span><span class="active">TICKETS</span><span>MY TICKETS</span><span>STADIUM INFO</span></nav>
-<div id="empInfo" style="font-size:12px;background:#1e2a55;padding:6px 10px;border-radius:20px;display:none"></div>
-</header>
+<header><b onclick="tap()">🛡️ JUBA STADIUM TICKETING</b><div id="empInfo" style="font-size:11px;background:#1e2a55;padding:5px 10px;border-radius:20px;display:none"></div></header>
 
-<div class="hero">
-<h1>Secure Your Seat — Live Matches</h1>
-<p>Book tickets for upcoming events at Juba National Stadium. Fast, secure, and instant digital tickets with QR code entry.</p>
-<div class="btns"><button class="btn btn-blue" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">→ Browse Matches</button><button class="btn btn-green" onclick="alert('Map: Gates 1-4 North/South, VIP East')">Stadium Map</button></div>
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="admin">
+<h3 style="margin:0">🔒 Admin Panel - الادمن فقط</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+<input id="t1Name" placeholder="Team 1"><input id="t2Name" placeholder="Team 2">
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<div>شعار 1 <input type="file" id="f1" accept="image/*" onchange="up(this,1)"><img id="pv1" style="width:100%;height:60px;object-fit:contain;background:#fff;border-radius:8px;margin-top:4px"></div>
+<div>شعار 2 <input type="file" id="f2" accept="image/*" onchange="up(this,2)"><img id="pv2" style="width:100%;height:60px;object-fit:contain;background:#fff;border-radius:8px;margin-top:4px"></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px"><input id="pVIP" placeholder="VIP"><input id="pA" placeholder="A"><input id="pB" placeholder="B"></div>
+
+<h4 style="margin:12px 0 4px">📅 إضافة مباراة قادمة</h4>
+<div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:6px"><input id="nextMatch" placeholder="South Sudan vs Uganda"><input id="nextDate" type="date"><input id="nextPrice" placeholder="From SSP"><button class="btn btn-y" onclick="addUpcoming()">إضافة</button></div>
+<div id="upcomingAdmin" style="margin-top:8px"></div>
+
+<div class="dash" style="margin-top:12px">
+<div><b id="totalT">0</b><br><small>إجمالي التذاكر</small></div>
+<div><b id="totalR">0</b><br><small>إجمالي الدخل SSP</small></div>
+<div><b id="totalG">0</b><br><small>البوابات النشطة</small></div>
+<div><b id="totalE">0</b><br><small>الموظفين</small></div>
+</div>
+<div id="perEmp" style="margin-top:8px;font-size:12px"></div>
+<button class="btn" style="width:100%;background:#000;color:var(--y);margin-top:8px" onclick="saveAll()">حفظ كل شي ✓</button>
 </div>
 
 <div class="grid">
-  <!-- TICKET PREVIEW -->
-  <div class="card" id="booking">
-    <div class="card-top"><div style="background:var(--blue)"></div><div style="background:var(--red)"></div><div style="background:var(--green)"></div><div style="background:var(--yellow)"></div></div>
-    <div style="margin-top:12px"><span class="status up">● UPCOMING</span> <small id="previewId" style="opacity:.6">Ticket #JUBA-M...</small></div>
-    <h2 style="margin:10px 0 4px">South Sudan vs Kenya</h2>
-    <small style="opacity:.6">FIFA World Cup Qualifier • Group A</small>
-    <div style="display:flex;gap:14px;margin:12px 0;font-size:12px;opacity:.8">📅 Sat, 15 Nov 2025 🕕 18:00 EAT 📍 Juba National Stadium</div>
-    <hr style="border:0;border-top:1px dashed #2a345f;margin:12px 0">
-    <div style="display:flex;justify-content:space-between">
-      <div>
-        <div style="font-size:11px;color:var(--yellow)">CUSTOMER</div><input id="custName" placeholder="Full Name" style="width:200px">
-        <div style="font-size:11px;color:var(--yellow);margin-top:10px">GATE / البوابة</div><select id="gateSelect" style="width:200px"><option>GATE 1 - North</option><option>GATE 2 - South</option><option>GATE 3 - VIP East</option><option>GATE 4 - West</option></select>
-        <div style="font-size:11px;color:var(--yellow);margin-top:10px">CATEGORY</div><select id="catSelect" style="width:200px"><option value="vip">VIP - Loading...</option><option value="a">Category A</option><option value="b">Category B</option></select>
-        <div style="margin-top:12px"><button class="btn btn-blue" style="border-radius:12px" onclick="issueTicket()">Issue Ticket + QR</button></div>
-      </div>
-      <div style="text-align:center"><div id="qrcode" class="qr"></div><div style="font-size:10px;margin-top:6px;opacity:.6">SCAN AT ENTRY</div><div style="font-size:11px;color:var(--green);margin-top:8px">● Valid • Non-transferable</div></div>
-    </div>
-  </div>
-
-  <!-- MY TICKETS -->
-  <div class="card">
-    <h3 style="margin:0 0 12px;border-bottom:1px solid var(--line);padding-bottom:10px">MY TICKETS</h3>
-    <div id="ticketsList" style="max-height:420px;overflow:auto"></div>
-  </div>
+<div class="card">
+<div class="teams"><div style="text-align:center"><img id="vLogo1" src="https://flagcdn.com/w80/ss.png"><div id="vName1" style="font-weight:800">South Sudan</div></div><div style="font-weight:800;color:var(--y)">VS</div><div style="text-align:center"><img id="vLogo2" src="https://flagcdn.com/w80/ke.png"><div id="vName2" style="font-weight:800">Kenya</div></div></div>
+<input id="cName" placeholder="اسم العميل"><input id="cPhone" placeholder="رقم الجمهور 2119xxxxxxxx للواتساب">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><select id="gate"><option>GATE 1 - North</option><option>GATE 2 - South</option><option>GATE 3 - VIP East</option><option>GATE 4 - West</option></select><select id="cat"><option value="vip">VIP</option><option value="a">A</option><option value="b">B</option></select></div>
+<button class="btn btn-b" style="width:100%;margin-top:8px" onclick="issue()">إصدار تذكرة</button>
+<div style="text-align:center;margin-top:10px"><div id="qr" style="display:inline-block;background:#fff;padding:6px;border-radius:10px"></div><div id="qrTxt" style="color:var(--y);font-weight:800;margin-top:6px"></div>
+<div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-y" style="flex:1" onclick="printPDF()">🖨️ طباعة PDF</button><button class="btn btn-g" style="flex:1" onclick="sendWA()">💬 واتساب للجمهور</button></div>
+</div>
+</div>
+<div class="card"><h3 style="margin:0">🎟️ تذاكري / كل التذاكر</h3><div id="list" style="max-height:600px;overflow:auto;margin-top:8px"></div></div>
 </div>
 
-<div class="sec">
-  <h3>UPCOMING MATCHES</h3>
-  <div class="match-row"><div><b style="background:var(--blue);padding:2px 6px;border-radius:6px;font-size:11px">19 NOV</b> South Sudan vs Ethiopia<br><small style="opacity:.6">19 Nov • 15:00 EAT • From 5,000 SSP</small></div><button class="buy" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Buy Ticket</button></div>
-  <div class="match-row"><div><b style="background:var(--green);padding:2px 6px;border-radius:6px;font-size:11px">25 NOV</b> South Sudan vs Rwanda<br><small style="opacity:.6">25 Nov • 18:00 EAT • From 5,000 SSP</small></div><button class="buy" style="background:transparent;border:1px solid var(--green);color:var(--green)" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Buy Ticket</button></div>
-</div>
+<div class="card"><h3>Upcoming Matches</h3><div id="upcomingView"></div></div>
 
-<!-- EMPLOYEE LOGIN -->
-<div class="login-modal" id="loginModal">
-  <div class="login-box">
-    <h3>🔒 Employee Login</h3><small style="opacity:.6">ادخل حساب الموظف لقطع التذاكر</small>
-    <input id="empId" placeholder="Employee ID e.g EMP-101">
-    <input id="empPass" type="password" placeholder="Password">
-    <button class="btn btn-blue" style="width:100%;margin-top:12px;border-radius:12px" onclick="loginEmp()">Login</button>
-    <button onclick="closeLogin()" style="background:transparent;color:#fff;border:0;width:100%;margin-top:8px;opacity:.6">Cancel</button>
-    <p id="loginErr" style="color:#ff5a5a;font-size:12px;margin-top:8px;display:none"></p>
-  </div>
-</div>
+<div class="login" id="loginM"><div class="login-box"><h3>Login</h3><input id="eId" placeholder="ADMIN or EMP-101"><input id="ePass" type="password" placeholder="Password"><button class="btn btn-b" style="width:100%;margin-top:8px" onclick="login()">دخول</button><p id="eErr" style="color:#ff6b6b;display:none"></p></div></div>
 
 <script>
 const firebaseConfig = { apiKey: "AIzaSyB65erIbKPojeJCtvWCaUPNBqA_YQ6QGJ0", authDomain: "juba-stadium-1ace0.firebaseapp.com", projectId: "juba-stadium-1ace0", storageBucket: "juba-stadium-1ace0.firebasestorage.app", messagingSenderId: "299347484908", appId: "1:299347484908:web:926e359973c26aa1f0c5c9" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+firebase.initializeApp(firebaseConfig); const db=firebase.firestore(), st=firebase.storage();
+let cur=null, match={team1Name:"South Sudan",team2Name:"Kenya",team1Logo:"https://flagcdn.com/w80/ss.png",team2Logo:"https://flagcdn.com/w80/ke.png"}, prices={vip:50000,a:30000,b:20000}, lastTicket=null;
 
-let currentEmp = null;
-let prices = {vip:50000,a:30000,b:20000};
+let t=0; function tap(){ t++; if(t>=5){ loginM.style.display='flex'; t=0 } setTimeout(()=>t=0,2000) }
+function login(){ const id=eId.value.trim(), p=ePass.value.trim(); db.collection('employees').doc(id).get().then(d=>{ if(!d.exists){ eErr.style.display='block'; eErr.textContent='ID غير موجود'; return } if(d.data().password!==p){ eErr.style.display='block'; eErr.textContent='باسورد خطأ'; return } cur={id,...d.data()}; localStorage.setItem('juba_emp',JSON.stringify(cur)); empInfo.style.display='block'; empInfo.innerHTML=`👤 ${d.data().name} | ${d.data().gate} | ${d.data().role} | <a onclick="localStorage.clear();location.reload()" style="color:#ffcc00;cursor:pointer">Logout</a>`; if(d.data().role==='admin') adminPanel.style.display='block'; loginM.style.display='none'; loadAll(); }); }
+try{ const s=JSON.parse(localStorage.getItem('juba_emp')); if(s){ cur=s; empInfo.style.display='block'; empInfo.innerHTML=`👤 ${s.name} | ${s.gate} | ${s.role} | <a onclick="localStorage.clear();location.reload()" style="color:#ffcc00;cursor:pointer">Logout</a>`; if(s.role==='admin') adminPanel.style.display='block'; } }catch{}
 
-// secret 5 clicks
-let c=0; document.getElementById('secretLogo').onclick=()=>{ c++; if(c>=5){ document.getElementById('loginModal').style.display='flex'; c=0 } setTimeout(()=>c=0,2000) }
-function closeLogin(){ document.getElementById('loginModal').style.display='none' }
+function up(inp,n){ const f=inp.files[0]; if(!f||f.size>2e6) return alert("اقل من 2MB"); const r=st.ref().child(`logos/team${n}_${Date.now()}.jpg`); r.put(f).then(()=>r.getDownloadURL().then(u=>{ if(n==1){ match.team1Logo=u; vLogo1.src=u; pv1.src=u } else { match.team2Logo=u; vLogo2.src=u; pv2.src=u } })); const fr=new FileReader(); fr.onload=e=>{ if(n==1) pv1.src=e.target.result; else pv2.src=e.target.result }; fr.readAsDataURL(f); }
 
-function loginEmp(){
-  const id = empId.value.trim(); const pass = empPass.value.trim();
-  if(!id||!pass) return showErr("اكتب ID والباسورد");
-  db.collection('employees').doc(id).get().then(doc=>{
-    if(!doc.exists) return showErr("الموظف غير موجود");
-    const d=doc.data();
-    if(d.password!==pass) return showErr("باسورد خطأ");
-    currentEmp={id,...d}; localStorage.setItem('juba_emp',JSON.stringify(currentEmp));
-    document.getElementById('empInfo').style.display='block';
-    document.getElementById('empInfo').innerHTML=`👤 ${d.name} | <span class="gate-tag">${d.gate}</span> | <a onclick="logout()" style="cursor:pointer;color:#ffcc00">Logout</a>`;
-    closeLogin(); loadPrices(); loadTickets();
-  }).catch(e=>showErr(e.message));
+function saveAll(){ db.collection('stadium_config').doc('current_match').set({...match,updated:Date.now()}); db.collection('stadium_config').doc('prices').set({vip:pVIP.value||prices.vip,a:pA.value||prices.a,b:pB.value||prices.b}); alert("تم الحفظ"); }
+function loadAll(){ db.collection('stadium_config').doc('current_match').get().then(d=>{ if(d.exists){ match=d.data(); vName1.textContent=match.team1Name; vName2.textContent=match.team2Name; vLogo1.src=match.team1Logo; vLogo2.src=match.team2Logo; t1Name.value=match.team1Name; t2Name.value=match.team2Name; } }); db.collection('stadium_config').doc('prices').get().then(d=>{ if(d.exists){ prices=d.data(); cat.innerHTML=`<option value="vip">VIP - ${Number(prices.vip).toLocaleString()}</option><option value="a">A - ${Number(prices.a).toLocaleString()}</option><option value="b">B - ${Number(prices.b).toLocaleString()}</option>`; pVIP.value=prices.vip; pA.value=prices.a; pB.value=prices.b; } }); loadUpcoming(); loadTickets(); }
+
+function issue(){ if(!cur) return loginM.style.display='flex'; const name=cName.value.trim(); if(name.length<3) return alert("اسم قصير"); const phone=cPhone.value.trim(); db.collection('stadium_config').doc('prices').get().then(pd=>{ const rp=pd.exists?pd.data():prices; const c=cat.value; let amt=c=='vip'?+rp.vip:c=='a'?+rp.a:+rp.b; const id="JUBA-M"+Date.now().toString().slice(-6); const data={id,customer:name,phone,gate:gate.value,category:c,amount:amt,team1:match.team1Name,team2:match.team2Name,team1Logo:match.team1Logo,team2Logo:match.team2Logo,issuedBy:cur.id,issuedByName:cur.name,created:firebase.firestore.FieldValue.serverTimestamp(),used:false}; db.collection('juba_tickets').doc(id).set(data).then(()=>{ lastTicket=data; qr.innerHTML=""; new QRCode(document.getElementById('qr'),{text:id+"|"+data.gate,width:120,height:120}); qrTxt.textContent=id+" - "+amt.toLocaleString()+" SSP"; }); }); }
+
+async function printPDF(){
+  if(!lastTicket) return alert("اقطع تذكرة أولا");
+  const {jsPDF}=window.jspdf; const doc=new jsPDF();
+  doc.setFontSize(16); doc.text("JUBA NATIONAL STADIUM",20,20);
+  doc.setFontSize(12); doc.text(`${lastTicket.team1} VS ${lastTicket.team2}`,20,30);
+  doc.text(`Ticket: ${lastTicket.id}`,20,40); doc.text(`Customer: ${lastTicket.customer}`,20,50);
+  doc.text(`Gate: ${lastTicket.gate} | Cat: ${lastTicket.category}`,20,60); doc.text(`Amount: ${lastTicket.amount} SSP`,20,70);
+  doc.text(`Issued by: ${lastTicket.issuedByName} (${lastTicket.issuedBy})`,20,80);
+  doc.save(lastTicket.id+".pdf");
 }
-function showErr(m){ const el=document.getElementById('loginErr'); el.style.display='block'; el.textContent=m }
-function logout(){ localStorage.removeItem('juba_emp'); location.reload() }
-
-// restore session
-try{ const s=JSON.parse(localStorage.getItem('juba_emp')); if(s){ currentEmp=s; document.getElementById('empInfo').style.display='block'; document.getElementById('empInfo').innerHTML=`👤 ${s.name} | <span class="gate-tag">${s.gate}</span> | <a onclick="logout()" style="cursor:pointer;color:#ffcc00">Logout</a>` } }catch{}
-
-function loadPrices(){
-  db.collection('stadium_config').doc('prices').get().then(d=>{
-    if(d.exists){ prices=d.data(); const sel=document.getElementById('catSelect');
-      sel.innerHTML=`<option value="vip">VIP - ${Number(prices.vip).toLocaleString()} SSP</option><option value="a">Category A - ${Number(prices.a).toLocaleString()} SSP</option><option value="b">Category B - ${Number(prices.b).toLocaleString()} SSP</option>`;
-    }
-  });
-}
-loadPrices();
-
-function issueTicket(){
-  if(!currentEmp) return document.getElementById('loginModal').style.display='flex';
-  const name=document.getElementById('custName').value.trim(); if(name.length<3) return alert("اسم العميل قصير");
-  const gate=document.getElementById('gateSelect').value;
-  const cat=document.getElementById('catSelect').value;
-  // السعر يؤخذ من السيرفر وليس من الـ select لمنع الثغرة
-  db.collection('stadium_config').doc('prices').get().then(pdoc=>{
-    const realPrices=pdoc.exists?pdoc.data():prices;
-    let amount = cat==='vip'?Number(realPrices.vip):cat==='a'?Number(realPrices.a):Number(realPrices.b);
-    if(!amount||amount<1000) amount=5000;
-    const ticketId="JUBA-M"+Date.now().toString().slice(-6)+Math.random().toString(36).substring(2,4).toUpperCase();
-    const data={ id:ticketId, customer:name, gate, category:cat, amount, issuedBy:currentEmp.id, issuedByName:currentEmp.name, created:firebase.firestore.FieldValue.serverTimestamp(), used:false };
-    db.collection('juba_tickets').doc(ticketId).set(data).then(()=>{
-      document.getElementById('previewId').textContent="Ticket #"+ticketId;
-      document.getElementById('qrcode').innerHTML=""; new QRCode(document.getElementById('qrcode'),{text:`${ticketId}|${gate}|${amount}`,width:120,height:120});
-      document.getElementById('custName').value="";
-    });
-  });
+function sendWA(){
+  if(!lastTicket) return alert("اقطع تذكرة أولا");
+  const ph=lastTicket.phone||cPhone.value.trim(); if(!ph) return alert("اكتب رقم الواتساب");
+  let num=ph.replace(/[^0-9]/g,""); if(num.startsWith("0")) num="211"+num.slice(1); if(!num.startsWith("211")) num="211"+num;
+  const txt=`🎟️ Juba Stadium Ticket\n${lastTicket.team1} vs ${lastTicket.team2}\nID: ${lastTicket.id}\nGate: ${lastTicket.gate}\nAmount: ${lastTicket.amount} SSP\nCustomer: ${lastTicket.customer}\nShow QR at entry.`;
+  window.open(`https://wa.me/${num}?text=${encodeURIComponent(txt)}`,"_blank");
 }
 
 function loadTickets(){
-  db.collection('juba_tickets').orderBy('created','desc').limit(50).onSnapshot(s=>{
-    let html=""; s.forEach(doc=>{
-      const t=doc.data(); const used=t.used?`<span class="status used">USED</span>`:`<span class="status up">VALID</span>`;
-      html+=`<div style="border-bottom:1px solid #1f2742;padding:10px 0;display:flex;justify-content:space-between"><div><div style="font-size:12px;font-weight:700">${t.id} ${used}</div><div style="font-size:11px;opacity:.7">${t.customer} • ${t.gate} • ${t.issuedByName||''}</div><div style="font-size:11px;color:var(--yellow)">${(t.amount||0).toLocaleString()} SSP</div></div><div style="font-size:10px;opacity:.5">${t.category}</div></div>`;
+  let q=db.collection('juba_tickets').orderBy('created','desc').limit(100);
+  // لو موظف عادي يشوف تذاكرو بس
+  if(cur && cur.role!=='admin'){ q=db.collection('juba_tickets').where('issuedBy','==',cur.id).orderBy('created','desc').limit(100) }
+  q.onSnapshot(s=>{
+    let html="", tot=0, per={}, gates={};
+    s.forEach(doc=>{ const t=doc.data(); tot+=t.amount||0; per[t.issuedBy]=(per[t.issuedBy]||0)+(t.amount||0); gates[t.gate]=(gates[t.gate]||0)+1;
+      html+=`<div style="border-bottom:1px solid #1f2742;padding:6px 0"><b>${t.id}</b> <small style="color:var(--y)">${t.team1} vs ${t.team2}</small><br><small>${t.customer} | ${t.phone||''} | ${t.gate} | ${t.issuedByName}</small> <span style="float:left">${(t.amount||0).toLocaleString()}</span></div>`;
     });
-    document.getElementById('ticketsList').innerHTML=html||"<small style='opacity:.5'>No tickets yet</small>";
+    list.innerHTML=html||"No tickets";
+    if(cur && cur.role==='admin'){ totalT.textContent=s.size; totalR.textContent=tot.toLocaleString(); totalG.textContent=Object.keys(gates).length; totalE.textContent=Object.keys(per).length;
+      let pe=""; for(let k in per){ pe+=`<div>${k}: ${per[k].toLocaleString()} SSP</div>` } perEmp.innerHTML=pe;
+    }
   });
 }
-loadTickets();
-if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js') }
+
+function addUpcoming(){ const n=nextMatch.value.trim(), d=nextDate.value, p=nextPrice.value; if(!n) return; db.collection('upcoming_matches').add({name:n,date:d,price:p,created:Date.now()}).then(()=>{ nextMatch.value=""; loadUpcoming(); }); }
+function loadUpcoming(){
+  db.collection('upcoming_matches').orderBy('created','desc').onSnapshot(s=>{
+    let h1="", h2=""; s.forEach(doc=>{ const m=doc.data(); h1+=`<div style="display:flex;justify-content:space-between;background:#11182e;padding:8px;border-radius:8px;margin-top:6px"><div>${m.name} - ${m.date||''}</div><div>${m.price||''} SSP <button onclick="db.collection('upcoming_matches').doc('${doc.id}').delete()" style="background:#b91c1c;color:#fff;border:0;border-radius:6px;padding:2px 6px">X</button></div></div>`; h2+=`<div style="display:flex;justify-content:space-between;background:#12172a;border:1px solid var(--l);border-radius:12px;padding:10px;margin-top:8px"><div>${m.name}<br><small style="opacity:.6">${m.date} • From ${m.price}</small></div><button class="btn btn-y">Buy</button></div>`; });
+    upcomingAdmin.innerHTML=h1; upcomingView.innerHTML=h2;
+  });
+}
+loadAll();
 </script>
 </body>
 </html>
