@@ -1,160 +1,171 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
-  <link rel="manifest" href="manifest.json">
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}</script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JUBA INTERNATIONAL STADIUM - SECURE SSP</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JUBA NATIONAL STADIUM - Ticketing</title>
+<link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800&family=Tajawal:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;font-family:'Inter','Tajawal',system-ui}
-body{margin:0;background:#080c1e;color:#fff;min-height:100vh}
-header{background:linear-gradient(90deg,#0b3d91,#08163a);padding:18px;text-align:center;font-weight:800;font-size:20px;letter-spacing:1px;position:sticky;top:0;z-index:20;cursor:pointer;border-bottom:2px solid #f9d616}
-header small{display:block;font-size:10px;opacity:.6;margin-top:4px}
-.wrap{max-width:920px;margin:18px auto;padding:0 14px}
-.card{background:linear-gradient(180deg,#151d36,#11182e);border:1px solid #243055;border-radius:20px;padding:18px;margin-bottom:16px;box-shadow:0 12px 30px rgba(0,0,0,.4)}
-.admin-card{background:linear-gradient(180deg,#fffbe0,#ffe77a);color:#111;border-radius:18px;padding:16px;display:none;border:2px dashed #c8a200}
-.admin-card h3{margin:0 0 10px;color:#000}
-.admin-card input{width:32%;padding:12px;border-radius:12px;border:1px solid #c9b86a;text-align:center;font-weight:800}
-.admin-card button{width:100%;margin-top:12px;padding:14px;background:#111;border:0;border-radius:14px;color:#ffe77a;font-weight:800;font-size:16px}
-.ticket-row{display:flex;gap:10px}
-.ticket-row input,.ticket-row select{flex:1;padding:15px;border-radius:14px;border:1px solid #2a365f;background:#0e1530;color:#fff;font-size:15px}
-.btn-primary{width:100%;padding:17px;background:linear-gradient(90deg,#2a6bff,#1746b0);border:0;border-radius:14px;color:#fff;font-weight:800;font-size:18px;margin-top:12px;cursor:pointer}
-.team-logos{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-.logo-box{background:#fff;border-radius:14px;padding:10px;color:#000;text-align:center}
-.logo-box img{width:100%;height:90px;object-fit:contain;margin-top:8px;border-radius:8px;background:#f5f5f5}
-.tickets-list{background:#fff;color:#000;border-radius:18px;padding:14px;display:none;margin-top:16px}
-table{width:100%;border-collapse:collapse}
-th{background:#0b3d91;color:#fff;padding:10px;font-size:13px}
-td{padding:10px;border-bottom:1px solid #eee;text-align:center;font-size:13px}
-.del{background:#b91c1c;color:#fff;border:0;border-radius:8px;padding:6px 12px;cursor:pointer}
-.hidden{display:none!important}
-.qr-box{background:#fff;padding:12px;border-radius:12px;display:inline-block}
-#summary{font-weight:800;color:#0b3d91}
+:root{--blue:#1e5bff;--red:#ff2d2d;--green:#00c950;--yellow:#ffcc00;--bg:#070a14;--card:#12172a;--line:#1f2742}
+*{box-sizing:border-box;font-family:Inter,sans-serif}body{margin:0;background:var(--bg);color:#fff}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:#0a0e1f;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;cursor:pointer}
+.logo b{color:var(--yellow)}nav{display:flex;gap:22px;font-size:13px;font-weight:600;opacity:.8}
+nav span.active{color:var(--yellow);border-bottom:2px solid var(--yellow);padding-bottom:4px}
+.hero{padding:28px 22px;background:radial-gradient(800px 300px at 20% 10%,#1a2350 0,#070a14 70%)}
+.hero h1{font-size:38px;margin:0 0 10px;line-height:1.1}
+.hero p{opacity:.7;max-width:520px;font-size:14px}
+.btns{margin-top:16px;display:flex;gap:12px}
+.btn{padding:12px 22px;border-radius:28px;border:0;font-weight:700;cursor:pointer}
+.btn-blue{background:var(--blue);color:#fff}.btn-green{background:transparent;border:1px solid var(--green);color:var(--green)}
+.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;padding:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;position:relative;overflow:hidden}
+.card-top{height:6px;display:flex}.card-top div{flex:1}
+.status{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.up{background:var(--green)}.used{background:var(--red)}
+.qr{background:#fff;padding:8px;border-radius:10px;display:inline-block}
+.sec{padding:0 22px 22px}
+.match-row{display:flex;justify-content:space-between;align-items:center;background:#12172a;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px}
+.buy{background:var(--yellow);color:#000;border:0;border-radius:20px;padding:8px 16px;font-weight:800;cursor:pointer}
+input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#0d1226;color:#fff;margin-top:8px}
+.login-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:99}
+.login-box{background:#12172a;border:1px solid var(--line);padding:22px;border-radius:18px;width:90%;max-width:380px}
+.gate-tag{background:#1e2a55;color:#7aa2ff;padding:3px 8px;border-radius:6px;font-size:11px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}nav{display:none}.hero h1{font-size:28px}}
 </style>
 </head>
 <body>
-<header id="secretHeader">JUBA INTERNATIONAL STADIUM<br>TICKETING SECURE SSP<small>اضغط 5 مرات للأدمن • 5 taps for admin</small></header>
+<header>
+<div class="logo" id="secretLogo">🛡️ JUBA NATIONAL STADIUM <b>TICKETING</b></div>
+<nav><span>MATCHES</span><span class="active">TICKETS</span><span>MY TICKETS</span><span>STADIUM INFO</span></nav>
+<div id="empInfo" style="font-size:12px;background:#1e2a55;padding:6px 10px;border-radius:20px;display:none"></div>
+</header>
 
-<div class="wrap">
-  <!-- ADMIN ONLY - مخفي -->
-  <div id="adminSection" class="admin-card">
-    <h3>🔒 Admin Only - تعديل الأسعار SSP</h3>
-    <div style="display:flex;gap:8px">
-      <input id="priceVIP" placeholder="VIP"><input id="priceA" placeholder="A"><input id="priceB" placeholder="B">
-    </div>
-    <button onclick="savePrices()">Save Prices ✓</button>
-    <div class="team-logos">
-      <div class="logo-box"><label>شعار الفريق 1</label><br><input type="file" id="logo1" accept="image/*" onchange="previewLogo(this,'prev1')"><img id="prev1"></div>
-      <div class="logo-box"><label>شعار الفريق 2</label><br><input type="file" id="logo2" accept="image/*" onchange="previewLogo(this,'prev2')"><img id="prev2"></div>
+<div class="hero">
+<h1>Secure Your Seat — Live Matches</h1>
+<p>Book tickets for upcoming events at Juba National Stadium. Fast, secure, and instant digital tickets with QR code entry.</p>
+<div class="btns"><button class="btn btn-blue" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">→ Browse Matches</button><button class="btn btn-green" onclick="alert('Map: Gates 1-4 North/South, VIP East')">Stadium Map</button></div>
+</div>
+
+<div class="grid">
+  <!-- TICKET PREVIEW -->
+  <div class="card" id="booking">
+    <div class="card-top"><div style="background:var(--blue)"></div><div style="background:var(--red)"></div><div style="background:var(--green)"></div><div style="background:var(--yellow)"></div></div>
+    <div style="margin-top:12px"><span class="status up">● UPCOMING</span> <small id="previewId" style="opacity:.6">Ticket #JUBA-M...</small></div>
+    <h2 style="margin:10px 0 4px">South Sudan vs Kenya</h2>
+    <small style="opacity:.6">FIFA World Cup Qualifier • Group A</small>
+    <div style="display:flex;gap:14px;margin:12px 0;font-size:12px;opacity:.8">📅 Sat, 15 Nov 2025 🕕 18:00 EAT 📍 Juba National Stadium</div>
+    <hr style="border:0;border-top:1px dashed #2a345f;margin:12px 0">
+    <div style="display:flex;justify-content:space-between">
+      <div>
+        <div style="font-size:11px;color:var(--yellow)">CUSTOMER</div><input id="custName" placeholder="Full Name" style="width:200px">
+        <div style="font-size:11px;color:var(--yellow);margin-top:10px">GATE / البوابة</div><select id="gateSelect" style="width:200px"><option>GATE 1 - North</option><option>GATE 2 - South</option><option>GATE 3 - VIP East</option><option>GATE 4 - West</option></select>
+        <div style="font-size:11px;color:var(--yellow);margin-top:10px">CATEGORY</div><select id="catSelect" style="width:200px"><option value="vip">VIP - Loading...</option><option value="a">Category A</option><option value="b">Category B</option></select>
+        <div style="margin-top:12px"><button class="btn btn-blue" style="border-radius:12px" onclick="issueTicket()">Issue Ticket + QR</button></div>
+      </div>
+      <div style="text-align:center"><div id="qrcode" class="qr"></div><div style="font-size:10px;margin-top:6px;opacity:.6">SCAN AT ENTRY</div><div style="font-size:11px;color:var(--green);margin-top:8px">● Valid • Non-transferable</div></div>
     </div>
   </div>
 
+  <!-- MY TICKETS -->
   <div class="card">
-    <h2 style="margin:0 0 12px">🎟️ حجز تذكرة جديدة</h2>
-    <div class="ticket-row"><input id="custName" placeholder="الاسم / Full Name"><input id="custPhone" placeholder="Phone / الهاتف"></div>
-    <div class="ticket-row" style="margin-top:10px">
-      <select id="ticketCat"><option value="50000">VIP - 50,000 SSP</option><option value="30000">Category A - 30,000 SSP</option><option value="20000">Category B - 20,000 SSP</option></select>
-      <input id="ticketQty" type="number" value="1" min="1">
-    </div>
-    <button class="btn-primary" onclick="createTicket()">إصدار تذكرة + QR Code</button>
-    <div id="qrResult" class="hidden" style="text-align:center;margin-top:18px">
-      <div id="qrcode" class="qr-box"></div>
-      <p id="newId" style="margin-top:10px;font-weight:800;font-size:16px;color:#f9d616"></p>
-      <p style="font-size:12px;opacity:.7">احفظ الـ QR للدخول</p>
-    </div>
+    <h3 style="margin:0 0 12px;border-bottom:1px solid var(--line);padding-bottom:10px">MY TICKETS</h3>
+    <div id="ticketsList" style="max-height:420px;overflow:auto"></div>
   </div>
+</div>
 
-  <div id="ticketsWrap" class="tickets-list">
-    <h3>📋 قائمة التذاكر - Admin View</h3>
-    <p id="summary">0 tickets - 0 SSP</p>
-    <input id="searchBox" placeholder="Search ID / Name / Phone" style="width:100%;padding:12px;border-radius:12px;border:1px solid #ccc;margin:10px 0" oninput="filterTickets()">
-    <table><thead><tr><th>ID</th><th>Name</th><th>Total</th><th>X</th></tr></thead><tbody id="ticketsBody"></tbody></table>
+<div class="sec">
+  <h3>UPCOMING MATCHES</h3>
+  <div class="match-row"><div><b style="background:var(--blue);padding:2px 6px;border-radius:6px;font-size:11px">19 NOV</b> South Sudan vs Ethiopia<br><small style="opacity:.6">19 Nov • 15:00 EAT • From 5,000 SSP</small></div><button class="buy" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Buy Ticket</button></div>
+  <div class="match-row"><div><b style="background:var(--green);padding:2px 6px;border-radius:6px;font-size:11px">25 NOV</b> South Sudan vs Rwanda<br><small style="opacity:.6">25 Nov • 18:00 EAT • From 5,000 SSP</small></div><button class="buy" style="background:transparent;border:1px solid var(--green);color:var(--green)" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Buy Ticket</button></div>
+</div>
+
+<!-- EMPLOYEE LOGIN -->
+<div class="login-modal" id="loginModal">
+  <div class="login-box">
+    <h3>🔒 Employee Login</h3><small style="opacity:.6">ادخل حساب الموظف لقطع التذاكر</small>
+    <input id="empId" placeholder="Employee ID e.g EMP-101">
+    <input id="empPass" type="password" placeholder="Password">
+    <button class="btn btn-blue" style="width:100%;margin-top:12px;border-radius:12px" onclick="loginEmp()">Login</button>
+    <button onclick="closeLogin()" style="background:transparent;color:#fff;border:0;width:100%;margin-top:8px;opacity:.6">Cancel</button>
+    <p id="loginErr" style="color:#ff5a5a;font-size:12px;margin-top:8px;display:none"></p>
   </div>
 </div>
 
 <script>
-// === CONFIG حقك نزلتو هنا ===
 const firebaseConfig = { apiKey: "AIzaSyB65erIbKPojeJCtvWCaUPNBqA_YQ6QGJ0", authDomain: "juba-stadium-1ace0.firebaseapp.com", projectId: "juba-stadium-1ace0", storageBucket: "juba-stadium-1ace0.firebasestorage.app", messagingSenderId: "299347484908", appId: "1:299347484908:web:926e359973c26aa1f0c5c9" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// اظهار الادمن - 5 ضغطات او Ctrl+Shift+A
-let clicks=0;
-document.getElementById('secretHeader').onclick=()=>{ clicks++; if(clicks>=5){ showAdmin(); clicks=0; } setTimeout(()=>clicks=0,2500); }
-document.addEventListener('keydown',e=>{ if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==='a') showAdmin(); });
+let currentEmp = null;
+let prices = {vip:50000,a:30000,b:20000};
 
-function showAdmin(){
-  const pass=prompt("Admin Password:");
-  if(pass==="5293" || pass==="admin" || pass==="SSNPS2024"){
-    document.getElementById('adminSection').style.display='block';
-    document.getElementById('ticketsWrap').style.display='block';
-    loadPrices(); loadTickets();
-    alert("Admin Mode ON - لوحة التحكم فتحت");
-  } else if(pass!==null) alert("كلمة سر خطأ");
-}
+// secret 5 clicks
+let c=0; document.getElementById('secretLogo').onclick=()=>{ c++; if(c>=5){ document.getElementById('loginModal').style.display='flex'; c=0 } setTimeout(()=>c=0,2000) }
+function closeLogin(){ document.getElementById('loginModal').style.display='none' }
 
-function savePrices(){
-  db.collection('stadium_config').doc('prices').set({
-    vip: document.getElementById('priceVIP').value,
-    a: document.getElementById('priceA').value,
-    b: document.getElementById('priceB').value,
-    updated: Date.now()
-  }).then(()=>alert("تم الحفظ ✓"));
+function loginEmp(){
+  const id = empId.value.trim(); const pass = empPass.value.trim();
+  if(!id||!pass) return showErr("اكتب ID والباسورد");
+  db.collection('employees').doc(id).get().then(doc=>{
+    if(!doc.exists) return showErr("الموظف غير موجود");
+    const d=doc.data();
+    if(d.password!==pass) return showErr("باسورد خطأ");
+    currentEmp={id,...d}; localStorage.setItem('juba_emp',JSON.stringify(currentEmp));
+    document.getElementById('empInfo').style.display='block';
+    document.getElementById('empInfo').innerHTML=`👤 ${d.name} | <span class="gate-tag">${d.gate}</span> | <a onclick="logout()" style="cursor:pointer;color:#ffcc00">Logout</a>`;
+    closeLogin(); loadPrices(); loadTickets();
+  }).catch(e=>showErr(e.message));
 }
+function showErr(m){ const el=document.getElementById('loginErr'); el.style.display='block'; el.textContent=m }
+function logout(){ localStorage.removeItem('juba_emp'); location.reload() }
+
+// restore session
+try{ const s=JSON.parse(localStorage.getItem('juba_emp')); if(s){ currentEmp=s; document.getElementById('empInfo').style.display='block'; document.getElementById('empInfo').innerHTML=`👤 ${s.name} | <span class="gate-tag">${s.gate}</span> | <a onclick="logout()" style="cursor:pointer;color:#ffcc00">Logout</a>` } }catch{}
+
 function loadPrices(){
   db.collection('stadium_config').doc('prices').get().then(d=>{
-    if(d.exists){ const p=d.data(); document.getElementById('priceVIP').value=p.vip||50000; document.getElementById('priceA').value=p.a||30000; document.getElementById('priceB').value=p.b||20000; updateCats(p); }
-    else { priceVIP.value=50000; priceA.value=30000; priceB.value=20000; }
+    if(d.exists){ prices=d.data(); const sel=document.getElementById('catSelect');
+      sel.innerHTML=`<option value="vip">VIP - ${Number(prices.vip).toLocaleString()} SSP</option><option value="a">Category A - ${Number(prices.a).toLocaleString()} SSP</option><option value="b">Category B - ${Number(prices.b).toLocaleString()} SSP</option>`;
+    }
   });
 }
-function updateCats(p){
-  document.getElementById('ticketCat').innerHTML=`<option value="${p.vip}">VIP - ${Number(p.vip).toLocaleString()} SSP</option><option value="${p.a}">Category A - ${Number(p.a).toLocaleString()} SSP</option><option value="${p.b}">Category B - ${Number(p.b).toLocaleString()} SSP</option>`;
-}
-function previewLogo(input,id){ if(input.files&&input.files[0]){ const r=new FileReader(); r.onload=e=>document.getElementById(id).src=e.target.result; r.readAsDataURL(input.files[0]); } }
-
-function createTicket(){
-  const name=document.getElementById('custName').value.trim();
-  if(!name) return alert("اكتب الاسم");
-  const phone=document.getElementById('custPhone').value.trim();
-  const id="JUBA-M"+Date.now().toString().slice(-6)+Math.random().toString(36).substring(2,4).toUpperCase();
-  const total=parseInt(document.getElementById('ticketCat').value)*parseInt(document.getElementById('ticketQty').value||1);
-  db.collection('juba_tickets').doc(id).set({
-    id, name, phone, cat: document.getElementById('ticketCat').options[document.getElementById('ticketCat').selectedIndex].text,
-    total, qty: parseInt(document.getElementById('ticketQty').value||1), created: Date.now()
-  }).then(()=>{
-    document.getElementById('newId').textContent=id+" | "+total.toLocaleString()+" SSP";
-    document.getElementById('qrResult').classList.remove('hidden');
-    document.getElementById('qrcode').innerHTML="";
-    new QRCode(document.getElementById('qrcode'),{text:id+" | "+name+" | "+total,width:180,height:180});
-    document.getElementById('custName').value=""; document.getElementById('custPhone').value="";
-    loadTickets();
-  }).catch(e=>alert("خطأ فايربيس: "+e.message));
-}
-
-let allTickets=[];
-function loadTickets(){
-  db.collection('juba_tickets').orderBy('created','desc').onSnapshot(s=>{
-    allTickets=[]; let sum=0;
-    s.forEach(doc=>{ const d=doc.data(); allTickets.push(d); sum+=d.total||0; });
-    document.getElementById('summary').textContent=`${allTickets.length} tickets - ${sum.toLocaleString()} SSP`;
-    render(allTickets);
-  });
-}
-function render(list){
-  document.getElementById('ticketsBody').innerHTML=list.map(t=>`<tr><td>${t.id}</td><td>${t.name}</td><td>${(t.total||0).toLocaleString()}</td><td><button class="del" onclick="delTicket('${t.id}')">X</button></td></tr>`).join('');
-}
-function filterTickets(){
-  const q=document.getElementById('searchBox').value.toLowerCase();
-  render(allTickets.filter(t=>t.id.toLowerCase().includes(q)||t.name.toLowerCase().includes(q)||(t.phone||'').includes(q)));
-}
-function delTicket(id){ if(confirm("حذف التذكرة "+id+" ؟")) db.collection('juba_tickets').doc(id).delete(); }
-
 loadPrices();
+
+function issueTicket(){
+  if(!currentEmp) return document.getElementById('loginModal').style.display='flex';
+  const name=document.getElementById('custName').value.trim(); if(name.length<3) return alert("اسم العميل قصير");
+  const gate=document.getElementById('gateSelect').value;
+  const cat=document.getElementById('catSelect').value;
+  // السعر يؤخذ من السيرفر وليس من الـ select لمنع الثغرة
+  db.collection('stadium_config').doc('prices').get().then(pdoc=>{
+    const realPrices=pdoc.exists?pdoc.data():prices;
+    let amount = cat==='vip'?Number(realPrices.vip):cat==='a'?Number(realPrices.a):Number(realPrices.b);
+    if(!amount||amount<1000) amount=5000;
+    const ticketId="JUBA-M"+Date.now().toString().slice(-6)+Math.random().toString(36).substring(2,4).toUpperCase();
+    const data={ id:ticketId, customer:name, gate, category:cat, amount, issuedBy:currentEmp.id, issuedByName:currentEmp.name, created:firebase.firestore.FieldValue.serverTimestamp(), used:false };
+    db.collection('juba_tickets').doc(ticketId).set(data).then(()=>{
+      document.getElementById('previewId').textContent="Ticket #"+ticketId;
+      document.getElementById('qrcode').innerHTML=""; new QRCode(document.getElementById('qrcode'),{text:`${ticketId}|${gate}|${amount}`,width:120,height:120});
+      document.getElementById('custName').value="";
+    });
+  });
+}
+
+function loadTickets(){
+  db.collection('juba_tickets').orderBy('created','desc').limit(50).onSnapshot(s=>{
+    let html=""; s.forEach(doc=>{
+      const t=doc.data(); const used=t.used?`<span class="status used">USED</span>`:`<span class="status up">VALID</span>`;
+      html+=`<div style="border-bottom:1px solid #1f2742;padding:10px 0;display:flex;justify-content:space-between"><div><div style="font-size:12px;font-weight:700">${t.id} ${used}</div><div style="font-size:11px;opacity:.7">${t.customer} • ${t.gate} • ${t.issuedByName||''}</div><div style="font-size:11px;color:var(--yellow)">${(t.amount||0).toLocaleString()} SSP</div></div><div style="font-size:10px;opacity:.5">${t.category}</div></div>`;
+    });
+    document.getElementById('ticketsList').innerHTML=html||"<small style='opacity:.5'>No tickets yet</small>";
+  });
+}
+loadTickets();
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js') }
 </script>
 </body>
 </html>
