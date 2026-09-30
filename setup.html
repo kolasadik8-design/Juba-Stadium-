@@ -1,0 +1,20 @@
+<!DOCTYPE html><html><body style="background:#000;color:#fff;text-align:center;padding:20px">
+<h2>إضافة الموظفين</h2><button id="b" style="padding:15px;background:yellow;font-weight:800;border-radius:12px;width:100%">دوس هنا لإضافة كل الموظفين</button><div id="log"></div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = { apiKey: "AIzaSyB65erIbKPojeJCtvWCaUPNBqA_YQ6QGJ0", authDomain: "juba-stadium-1ace0.firebaseapp.com", projectId: "juba-stadium-1ace0"};
+firebase.initializeApp(firebaseConfig); const db=firebase.firestore();
+document.getElementById('b').onclick=async()=>{
+  const emps=[
+    {id:"ADMIN",name:"Super Admin",password:"Juba2025!",gate:"ALL",role:"admin"},
+    {id:"EMP-101",name:"John",password:"1010",gate:"GATE 1 - North",role:"staff"},
+    {id:"EMP-105",name:"Peter",password:"1050",gate:"GATE 1 - North",role:"staff"},
+    {id:"EMP-102",name:"James",password:"1020",gate:"GATE 2 - South",role:"staff"},
+    {id:"EMP-103",name:"Samuel",password:"1030",gate:"GATE 3 - VIP East",role:"staff"},
+    {id:"EMP-104",name:"Paul",password:"1040",gate:"GATE 4 - West",role:"staff"},
+  ];
+  for(let e of emps){ await db.collection('Juba_users').doc(e.id).set({name:e.name,password:e.password,gate:e.gate,role:e.role}); document.getElementById('log').innerHTML+=`<p>✅ ${e.id} اتعمل</p>`; }
+  document.getElementById('log').innerHTML+=`<h3>خلصنا! كل الموظفين اتضافو</h3>`;
+}
+</script></body></html>
