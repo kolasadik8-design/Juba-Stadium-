@@ -1,0 +1,61 @@
+<!DOCTYPE html><html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GATE SCANNER - Juba Stadium</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;font-family:system-ui}body{margin:0;background:#070a14;color:#fff;text-align:center}
+header{padding:12px;background:#0a0e1f;border-bottom:1px solid #1f2742}
+#reader{width:100%;max-width:400px;margin:12px auto;border-radius:16px;overflow:hidden}
+.ok{background:#00c950;color:#000;padding:16px;border-radius:12px;margin:12px;font-weight:800;font-size:18px}
+.bad{background:#ff2d2d;color:#fff;padding:16px;border-radius:12px;margin:12px;font-weight:800;font-size:18px}
+input{padding:12px;border-radius:12px;border:1px solid #1f2742;background:#0d1226;color:#fff;width:90%;max-width:300px;margin-top:8px}
+.btn{padding:12px 18px;border-radius:12px;border:0;font-weight:800;margin-top:8px;cursor:pointer}
+</style>
+</head><body>
+<header><b>🛡️ GATE SCANNER</b><div id="emp" style="font-size:11px;opacity:.7"></div></header>
+
+<div id="login" style="padding:20px"><h3>دخول موظف البوابة</h3><input id="id" placeholder="EMP-201"><input id="pass" type="password" placeholder="Password"><br><button class="btn" style="background:#1e5bff;color:#fff" onclick="login()">دخول</button><p id="err" style="color:#ff6b6b"></p></div>
+
+<div id="scanArea" style="display:none">
+<div id="reader"></div>
+<p style="opacity:.6">وجه الكاميرا لـ QR</p>
+<input id="manual" placeholder="ادخل رقم التذكرة يدويا JUBA-M..."><br><button class="btn" style="background:#ffcc00;color:#000" onclick="check(document.getElementById('manual').value)">فحص يدوي</button>
+<div id="result"></div>
+<div id="last" style="opacity:.6;font-size:12px;margin-top:10px"></div>
+</div>
+
+<script>
+const firebaseConfig = { apiKey: "AIzaSyB65erIbKPojeJCtvWCaUPNBqA_YQ6QGJ0", authDomain: "juba-stadium-1ace0.firebaseapp.com", projectId: "juba-stadium-1ace0", storageBucket: "juba-stadium-1ace0.firebasestorage.app", messagingSenderId: "299347484908", appId: "1:299347484908:web:926e359973c26aa1f0c5c9" };
+firebase.initializeApp(firebaseConfig); const db=firebase.firestore();
+let cur=null;
+
+function login(){ const i=document.getElementById('id').value.trim(), p=document.getElementById('pass').value.trim(); db.collection('employees').doc(i).get().then(d=>{ if(!d.exists||d.data().password!==p){ err.textContent='ID او باسورد خطأ'; return } cur={id:i,...d.data()}; localStorage.setItem('juba_emp',JSON.stringify(cur)); start(); }); }
+try{ const s=JSON.parse(localStorage.getItem('juba_emp')); if(s){ cur=s; start(); } }catch{}
+function start(){ document.getElementById('login').style.display='none'; document.getElementById('scanArea').style.display='block'; emp.textContent=`👤 ${cur.name} | ${cur.gate} | ${cur.role}`; const qr=new Html5Qrcode("reader"); qr.start({facingMode:"environment"},{fps:10,qrbox:250},txt=>{ check(txt); },()=>{}); }
+
+function check(raw){
+  if(!raw) return; let ticketId=raw.split('|')[0].split(' ')[0].trim(); // ياخد JUBA-M... من الـ QR
+  document.getElementById('manual').value=ticketId;
+  db.collection('juba_tickets').doc(ticketId).get().then(doc=>{
+    const res=document.getElementById('result');
+    if(!doc.exists){ res.innerHTML=`<div class="bad">❌ تذكرة غير موجودة<br>${ticketId}</div>`; return }
+    const t=doc.data();
+    // فحص البوابة - لو الادمن يسمح بكل البوابات
+    if(cur.gate!=="ALL" &&!t.gate.includes(cur.gate.split(' - ')[0]) && cur.role!=='admin'){
+      // تحذير بس ما بيمنع - عشان مرات الجمهور بجي بوابة غلط
+      console.log("Gate mismatch");
+    }
+    if(t.used){
+      res.innerHTML=`<div class="bad">⚠️ مستخدمة قبل كده!<br>${t.id}<br>${t.customer}<br>Used at: ${t.usedAt?new Date(t.usedAt.toDate()).toLocaleString():''}<br>By: ${t.usedBy||''}</div>`;
+    }else{
+      res.innerHTML=`<div class="ok">✅ صالحة - ادخل<br>${t.id}<br>${t.team1||''} vs ${t.team2||''}<br>${t.customer}<br>${t.gate} | ${t.amount} SSP</div>`;
+      // علمها مستخدمة
+      db.collection('juba_tickets').doc(ticketId).update({used:true,usedAt:firebase.firestore.FieldValue.serverTimestamp(),usedBy:cur.id,usedByName:cur.name,usedGate:cur.gate});
+    }
+    last.innerHTML=`آخر فحص: ${ticketId} - ${new Date().toLocaleTimeString()}`;
+  });
+}
+</script>
+</body></html>
