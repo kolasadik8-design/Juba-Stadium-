@@ -1,0 +1,15 @@
+{
+  "name": "Juba Stadium Ticketing",
+  "short_name": "Juba Stadium",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#080c1e",
+  "theme_color": "#0b3d91",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/109/109412.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
