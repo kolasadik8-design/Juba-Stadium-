@@ -170,7 +170,6 @@ async function loadTickets(){
  if(!currentEvent)return; const s=await db.collection('tickets').where('eventId','==',currentEvent.id).orderBy('createdAt','desc').limit(100).get();
  let h=''; s.forEach(d=>{const x=d.data(); h+=`<div class="bg-black p-1 rounded flex justify-between"><span>${x.tier.slice(0,3)} ${x.block} ${x.row} ${x.seat}</span><span>${x.assignedGate.split(' - ')[0]}</span><span class="text-yellow-400">${x.price}</span></div>`;}); ticketList.innerHTML=h;
 }
-</script>
  // Fix: Load tickets button
 document.addEventListener('DOMContentLoaded', ()=>{
   const btn = document.createElement('button');
@@ -189,5 +188,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   };
   document.body.appendChild(btn);
 });
+</script>
 </body>
  </html>
