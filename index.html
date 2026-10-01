@@ -1,99 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JUBA STADIUM - Ticketing</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JUBA STADIUM V4 - SECURE</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-black text-white p-3 font-mono">
-<div id="login" class="max-w-md mx-auto mt-16 bg-zinc-900 p-6 rounded-2xl">
-<h1 class="text-2xl font-black text-center">JUBA STADIUM</h1><p class="text-center text-zinc-500 text-xs mb-6">TICKET SYSTEM v2 - Seat Lock</p>
-<input id="uid" placeholder="ID e.g ADMIN" class="w-full p-3 rounded bg-black border border-zinc-700 mb-3">
-<input id="pass" type="password" placeholder="Password" class="w-full p-3 rounded bg-black border border-zinc-700 mb-4">
+<body class="bg-black text-white font-mono text-sm p-2">
+<div id="login" class="max-w-md mx-auto mt-12 bg-zinc-900 p-6 rounded-2xl">
+<h1 class="text-xl font-black text-center">JUBA NATIONAL STADIUM</h1><p class="text-center text-[10px] text-zinc-500 mb-4">SECURE TICKETING V4 - SEAT LOCK + QUOTA</p>
+<input id="uid" placeholder="Staff ID" class="w-full p-3 rounded bg-black border border-zinc-700 mb-2">
+<input id="pass" type="password" placeholder="Password" class="w-full p-3 rounded bg-black border border-zinc-700 mb-3">
 <button onclick="doLogin()" class="w-full bg-yellow-400 text-black font-black p-3 rounded-xl">LOGIN</button>
-<p id="msg" class="text-red-400 text-center mt-3"></p>
+<p id="msg" class="text-red-400 text-center mt-2"></p>
 </div>
 
-<div id="app" class="hidden max-w-6xl mx-auto">
-<div class="flex justify-between bg-zinc-900 p-3 rounded-xl mb-3"><span><b id="uName"></b> | <span id="uGate" class="text-yellow-400"></span></span><button onclick="location.reload()" class="bg-zinc-800 px-3 py-1 rounded">Logout</button></div>
+<div id="app" class="hidden max-w-7xl mx-auto">
+<div class="flex justify-between bg-zinc-900 p-3 rounded-xl mb-3">
+<div><b id="uName"></b> | GATE: <span id="uGate" class="text-yellow-400"></span> | <span id="uRole"></span></div>
+<div><a href="scan.html" target="_blank" class="bg-green-600 px-3 py-1 rounded mr-2">OPEN SCANNER</a><button onclick="location.reload()" class="bg-zinc-800 px-3 py-1 rounded">Logout</button></div>
+</div>
+
+<div id="fedPanel" class="hidden bg-zinc-900 p-4 rounded-xl mb-3 border border-yellow-400/30">
+<h2 class="font-black text-yellow-400">FEDERATION - CREATE MATCH / EVENT</h2>
+<div class="grid md:grid-cols-5 gap-2 mt-2">
+<select id="evType" class="p-2 rounded bg-black border border-zinc-700 col-span-2">
+<optgroup label="SOUTH SUDAN"><option>South Sudan Premier League</option><option>Juba Local League</option><option>South Sudan National Cup</option><option>Super Cup</option></optgroup>
+<optgroup label="CAF"><option>CAF Champions League</option><option>CAF Confederation Cup</option><option>CECAFA Club</option></optgroup>
+<optgroup label="NATIONAL TEAMS"><option>AFCON</option><option>AFCON Qualifiers</option><option>FIFA World Cup Qualifiers</option><option>CECAFA National</option></optgroup>
+<optgroup label="OTHER"><option>Other</option></optgroup>
+</select>
+<input id="homeTeam" placeholder="Home Club" class="p-2 rounded bg-black border border-zinc-700">
+<input id="awayTeam" placeholder="Away Club" class="p-2 rounded bg-black border border-zinc-700">
+<input id="evDate" type="date" class="p-2 rounded bg-black border border-zinc-700">
+</div>
+<div class="grid md:grid-cols-4 gap-2 mt-2">
+<div class="bg-black p-2 rounded"><label class="text-[9px]">HOME QUOTA %</label><input id="homeQ" type="number" value="40" class="w-full p-1 rounded bg-zinc-800 border border-zinc-700"></div>
+<div class="bg-black p-2 rounded"><label class="text-[9px]">AWAY QUOTA %</label><input id="awayQ" type="number" value="30" class="w-full p-1 rounded bg-zinc-800 border border-zinc-700"></div>
+<div class="bg-black p-2 rounded"><label class="text-[9px]">FED/STADIUM %</label><input id="fedQ" type="number" value="30" class="w-full p-1 rounded bg-zinc-800 border border-zinc-700"></div>
+<button onclick="createEvent()" class="bg-yellow-400 text-black font-black rounded">CREATE</button>
+</div>
+</div>
 
 <div class="grid md:grid-cols-3 gap-3">
 <div class="md:col-span-2 bg-zinc-900 p-4 rounded-xl">
-<h2 class="font-bold mb-3">CUT TICKET - ONE SEAT PER TICKET</h2>
-<div class="grid grid-cols-2 gap-2 mb-3">
-<select id="tier" onchange="updatePrice()" class="p-3 rounded bg-black border border-zinc-700">
-<option value="VIP">VIP - 30000 SSP</option>
-<option value="FIRST CLASS">FIRST CLASS - 15000 SSP</option>
-<option value="SECOND CLASS">SECOND CLASS - 7000 SSP</option>
-<option value="SEVEN MILE">SEVEN MILE - 5000 SSP</option>
-</select>
-<select id="block" class="p-3 rounded bg-black border border-zinc-700"><option>BLOCK A</option><option>BLOCK B</option><option>BLOCK C</option><option>BLOCK D</option></select>
+<div class="flex justify-between mb-2"><h2 class="font-bold">CUT TICKET - ONE SEAT LOCKED FOREVER</h2><select id="activeEvent" class="bg-black border border-zinc-700 rounded px-2 text-xs w-64"></select></div>
+
+<div class="bg-black p-2 rounded mb-2 text-[11px]">STANDS ORDER: <span class="text-yellow-400">VIP (Important Persons)</span> → FIRST CLASS → SECOND CLASS → SEVEN MILE (Third Class)</div>
+
+<div class="grid grid-cols-2 gap-2 mb-2">
+<select id="tier" class="p-2 rounded bg-black border border-zinc-700"><option value="VIP">VIP - IMPORTANT PERSONS - 30000 SSP - GATE 3</option><option value="FIRST CLASS">FIRST CLASS - 15000 SSP - GATE 1</option><option value="SECOND CLASS">SECOND CLASS - 7000 SSP - GATE 2</option><option value="SEVEN MILE">SEVEN MILE - THIRD CLASS - 5000 SSP - GATE 4</option></select>
+<select id="block" class="p-2 rounded bg-black border border-zinc-700"><option>BLOCK A</option><option>BLOCK B</option><option>BLOCK C</option><option>BLOCK D</option></select>
 </div>
-<div class="grid grid-cols-2 gap-2 mb-3">
-<select id="row" class="p-3 rounded bg-black border border-zinc-700"><script>for(let i=1;i<=20;i++)document.write(`<option>ROW ${i}</option>`) </script></select>
-<select id="seat" class="p-3 rounded bg-black border border-zinc-700"><script>for(let i=1;i<=30;i++)document.write(`<option>SEAT ${i}</option>`) </script></select>
+<div class="grid grid-cols-2 gap-2 mb-2"><select id="row" class="p-2 rounded bg-black border border-zinc-700"></select><select id="seat" class="p-2 rounded bg-black border border-zinc-700"></select></div>
+<div class="grid grid-cols-2 gap-2 mb-2"><input id="cName" placeholder="Customer Name" class="p-2 rounded bg-black border border-zinc-700"><input id="cPhone" placeholder="Phone 211..." class="p-2 rounded bg-black border border-zinc-700"></div>
+<div class="bg-black p-2 rounded mb-2 flex justify-between text-xs"><span>ID: <b id="seatIdPreview" class="text-yellow-400">-</b></span><span id="gateDirection" class="text-green-400"></span><span>PRICE: <b id="pricePreview">0</b></span></div>
+<button onclick="cutTicket()" id="cutBtn" class="w-full bg-yellow-400 text-black font-black p-3 rounded-xl">CUT & LOCK SEAT</button>
+<div id="qrcode" class="flex justify-center mt-3"></div><div id="tResult" class="mt-2 text-center text-xs"></div>
 </div>
-<div class="grid grid-cols-2 gap-2 mb-3">
-<input id="cName" placeholder="Customer Name (optional)" class="p-3 rounded bg-black border border-zinc-700">
-<input id="cPhone" placeholder="WhatsApp 211..." class="p-3 rounded bg-black border border-zinc-700">
+<div class="bg-zinc-900 p-3 rounded-xl"><h3 class="font-bold">LIVE SALES</h3><div id="quotaStatus" class="bg-black p-2 rounded my-2 text-[11px]"></div><div id="ticketList" class="space-y-1 max-h-[600px] overflow-auto text-[11px]"></div></div>
 </div>
-<div class="bg-black p-3 rounded mb-3 flex justify-between"><span>Seat ID:</span><b id="seatIdPreview" class="text-yellow-400">-</b><span>Price: <b id="pricePreview">30000</b> SSP</span></div>
-<button onclick="cutTicket()" id="cutBtn" class="w-full bg-yellow-400 text-black font-black p-3 rounded-xl">CUT TICKET & PRINT</button>
-<div id="qrcode" class="flex justify-center mt-3"></div><div id="tResult" class="mt-2 text-sm text-center"></div>
-</div>
-<div class="bg-zinc-900 p-4 rounded-xl"><h3 class="font-bold mb-2">Live Seats - <span id="liveGate"></span></h3><div id="ticketList" class="space-y-1 max-h-[500px] overflow-auto text-xs"></div></div>
-</div>
-<div id="adminPanel" class="hidden mt-3 bg-zinc-900 p-4 rounded-xl"><h2 class="font-black">ADMIN - ALL SALES</h2><div class="grid grid-cols-3 gap-2 my-3"><div class="bg-black p-3 rounded text-center"><div id="totalCount" class="text-xl font-black">0</div><div class="text-xs">Tickets</div></div><div class="bg-black p-3 rounded text-center"><div id="totalIncome" class="text-xl font-black text-yellow-400">0</div><div class="text-xs">SSP</div></div><div class="bg-black p-3 rounded text-center"><div id="dupBlock" class="text-xl font-black text-green-400">LOCKED</div><div class="text-xs">Seat Lock ON</div></div></div><div id="allTickets" class="text-xs space-y-1 max-h-[400px] overflow-auto"></div></div>
 </div>
 
 <script>
 const firebaseConfig={apiKey:"AIzaSyB65erIbKPojeJCtvWCaUPNBqA_YQ6QGJ0",authDomain:"juba-stadium-1ace0.firebaseapp.com",projectId:"juba-stadium-1ace0"};
 firebase.initializeApp(firebaseConfig); const db=firebase.firestore();
-let currentUser=null;
-const prices={"VIP":30000,"FIRST CLASS":15000,"SECOND CLASS":7000,"SEVEN MILE":5000};
-
-function updatePrice(){const t=document.getElementById('tier').value; document.getElementById('pricePreview').innerText=prices[t]; genSeatId();}
-function genSeatId(){const tier=document.getElementById('tier').value, block=document.getElementById('block').value, row=document.getElementById('row').value, seat=document.getElementById('seat').value; const id=`${tier}_${block}_${row}_${seat}`.replace(/\s+/g,'_'); document.getElementById('seatIdPreview').innerText=id; return id;}
-document.getElementById('tier').addEventListener('change',genSeatId); document.getElementById('block').addEventListener('change',genSeatId); document.getElementById('row').addEventListener('change',genSeatId); document.getElementById('seat').addEventListener('change',genSeatId); genSeatId();
-
+let currentUser=null, currentEvent=null;
+const PRICE_MAP={"VIP":30000,"FIRST CLASS":15000,"SECOND CLASS":7000,"SEVEN MILE":5000};
+const GATE_MAP={"VIP":"GATE 3 - VIP East (Important Persons)","FIRST CLASS":"GATE 1 - North","SECOND CLASS":"GATE 2 - South","SEVEN MILE":"GATE 4 - West"};
+for(let i=1;i<=20;i++)row.innerHTML+=`<option>ROW ${i}</option>`;
+for(let i=1;i<=30;i++)seat.innerHTML+=`<option>SEAT ${i}</option>`;
+function genId(){if(!currentEvent)return;const t=tier.value;const id=`${currentEvent.id}_${t}_${block.value}_${row.value}_${seat.value}`.replace(/\s+/g,'_');seatIdPreview.innerText=id;pricePreview.innerText=PRICE_MAP[t];gateDirection.innerText=GATE_MAP[t];return id;}
+tier.onchange=genId; block.onchange=genId; row.onchange=genId; seat.onchange=genId;
 async function doLogin(){
- const id=document.getElementById('uid').value.trim(), pw=document.getElementById('pass').value.trim();
- const doc=await db.collection('Juba_users').doc(id).get();
- if(!doc.exists){document.getElementById('msg').innerText='ID NOT FOUND';return;}
- if(doc.data().password!==pw){document.getElementById('msg').innerText='WRONG PASSWORD';return;}
- currentUser={id,...doc.data()}; document.getElementById('login').classList.add('hidden'); document.getElementById('app').classList.remove('hidden');
- document.getElementById('uName').innerText=currentUser.name; document.getElementById('uGate').innerText=currentUser.gate; document.getElementById('liveGate').innerText=currentUser.gate;
- if(currentUser.role==='admin') document.getElementById('adminPanel').classList.remove('hidden'); loadTickets();
+ const id=uid.value.trim(); const d=await db.collection('Juba_users').doc(id).get();
+ if(!d.exists||d.data().password!==pass.value.trim()){msg.innerText='INVALID LOGIN';return;}
+ currentUser={id,...d.data()}; login.classList.add('hidden'); app.classList.remove('hidden');
+ uName.innerText=currentUser.name; uGate.innerText=currentUser.gate; uRole.innerText=currentUser.role;
+ if(currentUser.role==='admin') fedPanel.classList.remove('hidden'); loadEvents();
 }
-
+async function createEvent(){
+ const h=parseInt(homeQ.value),a=parseInt(awayQ.value),f=parseInt(fedQ.value);
+ if(h+a+f!==100){alert('Total must 100%');return;}
+ const evId='EV-'+Date.now(); await db.collection('events').doc(evId).set({id:evId,type:evType.value,homeTeam:homeTeam.value,awayTeam:awayTeam.value,date:evDate.value,homeQuota:h,awayQuota:a,fedQuota:f,createdAt:firebase.firestore.FieldValue.serverTimestamp(),totalSeats:2400});
+ loadEvents();
+}
+async function loadEvents(){
+ const s=await db.collection('events').orderBy('createdAt','desc').limit(20).get(); let o=''; s.forEach(d=>{const e=d.data(); o+=`<option value="${e.id}">${e.type} - ${e.homeTeam} vs ${e.awayTeam}</option>`;});
+ activeEvent.innerHTML=o; if(s.docs[0]){currentEvent=s.docs[0].data(); genId(); loadTickets(); loadQuota();}
+ activeEvent.onchange=async()=>{currentEvent=(await db.collection('events').doc(activeEvent.value).get()).data(); genId(); loadTickets(); loadQuota();}
+}
+async function loadQuota(){
+ if(!currentEvent)return; const s=await db.collection('tickets').where('eventId','==',currentEvent.id).get();
+ quotaStatus.innerHTML=`Total Sold: ${s.size} / ${currentEvent.totalSeats}<br>Event: ${currentEvent.homeTeam} vs ${currentEvent.awayTeam}`;
+}
 async function cutTicket(){
- const btn=document.getElementById('cutBtn'); btn.disabled=true; btn.innerText='CHECKING...';
- const tier=document.getElementById('tier').value, block=document.getElementById('block').value, row=document.getElementById('row').value, seat=document.getElementById('seat').value;
- const seatId=genSeatId(); const price=prices[tier];
- const cName=document.getElementById('cName').value||'Guest', cPhone=document.getElementById('cPhone').value;
+ if(!currentEvent){alert('Create Event First');return;}
+ cutBtn.disabled=true; const seatId=genId(); const tierV=tier.value;
+ // SECURE: Price taken from server-side map, not user input
+ const finalPrice=PRICE_MAP[tierV]; const finalGate=GATE_MAP[tierV];
  try{
-  await db.runTransaction(async (t)=>{
-   const seatRef=db.collection('tickets').doc(seatId);
-   const doc=await t.get(seatRef);
-   if(doc.exists){throw new Error('SEAT ALREADY TAKEN - '+seatId);}
-   t.set(seatRef,{ticketId:seatId,tier,block,row,seat,price,cName,cPhone,gate:currentUser.gate,soldBy:currentUser.id,soldByName:currentUser.name,createdAt:firebase.firestore.FieldValue.serverTimestamp(),used:false});
+  await db.runTransaction(async tx=>{
+   const ref=db.collection('tickets').doc(seatId); const doc=await tx.get(ref);
+   if(doc.exists) throw new Error('SEAT ALREADY TAKEN - '+seatId);
+   tx.set(ref,{ticketId:seatId,eventId:currentEvent.id,eventType:currentEvent.type,tier:tierV,block:block.value,row:row.value,seat:seat.value,price:finalPrice,assignedGate:finalGate,cName:cName.value,cPhone:cPhone.value,soldBy:currentUser.id,soldByName:currentUser.name,soldByGate:currentUser.gate,createdAt:firebase.firestore.FieldValue.serverTimestamp(),used:false,checkedAt:null});
   });
-  document.getElementById('qrcode').innerHTML=''; new QRCode(document.getElementById('qrcode'),{text:seatId,width:130,height:130});
-  document.getElementById('tResult').innerHTML=`✅ SUCCESS: ${seatId}<br><button onclick="printPDF('${seatId}')" class="bg-white text-black px-3 py-1 rounded mt-2">PDF</button> <button onclick="sendWA('${cPhone}','${seatId}')" class="bg-green-600 px-3 py-1 rounded mt-2 ml-2">WhatsApp</button>`;
+  qrcode.innerHTML=''; new QRCode(qrcode,{text:seatId,width:130,height:130});
+  tResult.innerHTML=`✅ LOCKED - ${seatId}<br>GO TO: ${finalGate}`;
   loadTickets();
- }catch(e){document.getElementById('tResult').innerHTML=`<span class="text-red-400">❌ ${e.message}</span>`;}
- btn.disabled=false; btn.innerText='CUT TICKET & PRINT';
+ }catch(e){tResult.innerHTML=`<span class="text-red-400">❌ ${e.message}</span>`;}
+ cutBtn.disabled=false;
 }
-function printPDF(id){const {jsPDF}=window.jspdf; const doc=new jsPDF(); doc.text(`JUBA STADIUM`,20,20); doc.text(`Seat: ${id}`,20,30); doc.text(`Sold by: ${currentUser.name}`,20,40); doc.text(`Gate: ${currentUser.gate}`,20,50); doc.text(`${new Date().toLocaleString()}`,20,60); doc.save(id+'.pdf');}
-function sendWA(phone,id){if(!phone){alert('Enter WhatsApp');return;}let p=phone.replace(/\D/g,''); if(p.startsWith('0'))p='211'+p.slice(1); const msg=`JUBA STADIUM\nSeat: ${id}\nGate: ${currentUser.gate}\nPresent QR at gate`; window.open(`https://wa.me/${p}?text=${encodeURIComponent(msg)}`,'_blank');}
 async function loadTickets(){
- let q=db.collection('tickets').orderBy('createdAt','desc').limit(100); if(currentUser.gate!=='ALL') q=q.where('gate','==',currentUser.gate);
- const snap=await q.get(); let html='',count=0,income=0; snap.forEach(d=>{const x=d.data(); count++; income+=x.price||0; html+=`<div class="bg-black p-2 rounded flex justify-between"><span>${x.ticketId}</span><span>${x.price}</span></div>`;}); document.getElementById('ticketList').innerHTML=html||'No tickets';
- if(currentUser.role==='admin'){document.getElementById('totalCount').innerText=count; document.getElementById('totalIncome').innerText=income.toLocaleString(); document.getElementById('allTickets').innerHTML=html;}
+ if(!currentEvent)return; const s=await db.collection('tickets').where('eventId','==',currentEvent.id).orderBy('createdAt','desc').limit(100).get();
+ let h=''; s.forEach(d=>{const x=d.data(); h+=`<div class="bg-black p-1 rounded flex justify-between"><span>${x.tier.slice(0,3)} ${x.block} ${x.row} ${x.seat}</span><span>${x.assignedGate.split(' - ')[0]}</span><span class="text-yellow-400">${x.price}</span></div>`;});
+ ticketList.innerHTML=h;
 }
 </script>
 </body>
