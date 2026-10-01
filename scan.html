@@ -1,38 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JUBA - GATE SCANNER</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/html5-qrcode"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gate Scanner - Juba Stadium</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>body{background:#070a14;color:#fff;font-family:system-ui;text-align:center;padding:20px} #reader{width:100%;max-width:400px;margin:auto;border-radius:16px;overflow:hidden}.ok{background:#16a34a;padding:16px;border-radius:12px;margin-top:16px}.bad{background:#dc2626;padding:16px;border-radius:12px;margin-top:16px}</style>
 </head>
-<body class="bg-black text-white font-mono p-2">
-<div class="max-w-md mx-auto bg-zinc-900 p-4 rounded-xl">
-<h1 class="font-black text-center">GATE SCANNER - ANY GATE CAN SCAN</h1>
-<div id="reader" class="my-3"></div>
-<input id="manual" placeholder="Enter Ticket ID manually" class="w-full p-3 rounded bg-black border border-zinc-700 mb-2">
-<button onclick="checkTicket(manual.value)" class="w-full bg-yellow-400 text-black font-black p-2 rounded">CHECK</button>
-<div id="result" class="mt-4 p-4 rounded-xl bg-black text-center text-lg font-bold"></div>
-<audio id="okSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
-<audio id="badSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-</div>
-<script>
-const firebaseConfig={apiKey:"AIzaSyB65erIbKPojeJCtvWCaUPNBqA_YQ6QGJ0",authDomain:"juba-stadium-1ace0.firebaseapp.com",projectId:"juba-stadium-1ace0"};
-firebase.initializeApp(firebaseConfig); const db=firebase.firestore();
-async function checkTicket(id){
- if(!id){return;} id=id.trim();
- const ref=db.collection('tickets').doc(id); const doc=await ref.get();
- const res=document.getElementById('result');
- if(!doc.exists){res.innerHTML=`❌ INVALID TICKET<br><span class="text-sm">Not found</span>`; res.className='mt-4 p-4 rounded-xl bg-red-900 text-center'; badSound.play(); return;}
- const t=doc.data();
- if(t.used){res.innerHTML=`⚠️ ALREADY USED<br><span class="text-sm">Used at ${t.checkedAt?.toDate().toLocaleString()} by ${t.checkedByGate}</span><br><br>Ticket: ${t.tier} ${t.block} ${t.row} ${t.seat}`; res.className='mt-4 p-4 rounded-xl bg-orange-900 text-center'; badSound.play(); return;}
- // VALID - Show direction
- res.innerHTML=`✅ VALID<br><span class="text-2xl">${t.tier}</span><br>${t.block} - ${t.row} - ${t.seat}<br><br><div class="bg-yellow-400 text-black p-2 rounded">DIRECT TO: ${t.assignedGate}</div><br><span class="text-xs">Customer: ${t.cName||'Guest'} | Event: ${t.eventType}</span><br><br><button onclick="markUsed('${id}')" class="bg-green-600 px-6 py-3 rounded-xl">CONFIRM ENTRY</button>`;
- res.className='mt-4 p-4 rounded-xl bg-green-900 text-center'; okSound.play();
+<body>
+<h2>🎫 Gate Scanner</h2>
+<p>وجه الكاميرا على QR حق التذكرة</p>
+<div id="reader"></div>
+<div id="result"></div>
+<button onclick="startScan()" style="margin-top:20px;padding:12px 24px;background:#ffcc00;color:#000;border:0;border-radius:10px;font-weight:800">افتح الكاميرا</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB65erIbKPojeJCtvWCaUPNBqA_YQ6QGJ0",
+  authDomain: "juba-stadium-1ace0.firebaseapp.com",
+  projectId: "juba-stadium-1ace0",
+  storageBucket: "juba-stadium-1ace0.firebasestorage.app",
+  messagingSenderId: "299347484908",
+  appId: "1:299347484908:web:926e359973c26aa1f0c5c9"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let html5Qrcode;
+
+window.startScan = () => {
+  html5Qrcode = new Html5Qrcode("reader");
+  html5Qrcode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 },
+    async (decodedText) => {
+      // decodedText = "JUBA-M123456|GATE 1|50000"
+      const ticketId = decodedText.split('|')[0];
+      document.getElementById('result').innerHTML = "جاري الفحص... " + ticketId;
+      html5Qrcode.pause();
+
+      const ref = doc(db, "juba_tickets", ticketId);
+      const snap = await getDoc(ref);
+      if(!snap.exists()){
+        document.getElementById('result').innerHTML = `<div class="bad">❌ تذكرة غير موجودة: ${ticketId}</div>`;
+      } else {
+        const t = snap.data();
+        if(t.used){
+          document.getElementById('result').innerHTML = `<div class="bad">⚠️ مستخدمة من قبل! ${t.customer} - ${t.gate}<br>Time: ${t.usedAt?.toDate?.()||''}</div>`;
+        } else {
+          await updateDoc(ref, { used: true, usedAt: new Date() });
+          document.getElementById('result').innerHTML = `<div class="ok">✅ صالحة - دخول مسموح<br><b>${t.customer}</b><br>${t.gate} - ${t.amount} SSP<br>${ticketId}</div>`;
+        }
+      }
+      setTimeout(()=>{ document.getElementById('result').innerHTML=""; html5Qrcode.resume(); }, 3000);
+    },
+    (err) => {}
+  );
 }
-async function markUsed(id){await db.collection('tickets').doc(id).update({used:true,checkedAt:firebase.firestore.FieldValue.serverTimestamp(),checkedByGate:'SCANNER'}); document.getElementById('result').innerHTML='✅ ENTRY CONFIRMED - WELCOME';}
-const html5Qr=new Html5Qrcode("reader"); html5Qr.start({facingMode:"environment"},{fps:10,qrbox:250},(txt)=>{manual.value=txt; checkTicket(txt);});
 </script>
 </body>
 </html>
