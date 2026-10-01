@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juba Stadium - Secure Event Fix</title>
+<style>body{font-family:system-ui;padding:24px;max-width:600px;margin:auto;background:#070a14;color:#fff}button{padding:14px 28px;background:#16a34a;color:#fff;border:0;border-radius:10px;cursor:pointer;font-weight:700}pre{background:#111;color:#0f0;padding:12px;border-radius:8px;white-space:pre-wrap}</style>
+</head>
+<body>
+<h2>Secure Fix: Events Collection</h2>
+<p>Deletes malformed fields (hometeam, totalseats) and creates correct one.</p>
+<button id="fixBtn">Run Secure Fix</button>
+<pre id="log">Ready...</pre>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB65erIbKPojeJCtvWCaUPNBqA_YQ6QGJ0",
+  authDomain: "juba-stadium-1ace0.firebaseapp.com",
+  projectId: "juba-stadium-1ace0",
+  storageBucket: "juba-stadium-1ace0.firebasestorage.app",
+  messagingSenderId: "299347484908",
+  appId: "1:299347484908:web:926e359973c26aa1f0c5c9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const logEl = document.getElementById('log');
+const log = (m) => logEl.textContent += "\n" + m;
+
+function validateEvent(e){
+  if(typeof e.homeTeam !== 'string' || e.homeTeam.length <2 || e.homeTeam.length>50) throw new Error("Invalid homeTeam");
+  if(typeof e.awayTeam !== 'string' || e.awayTeam.length <2 || e.awayTeam.length>50) throw new Error("Invalid awayTeam");
+  if(!Number.isInteger(e.totalSeats) || e.totalSeats <=0 || e.totalSeats > 50000) throw new Error("Invalid totalSeats");
+  if(e.homeQuota + e.awayQuota + e.fedQuota !== 100) throw new Error("Quotas must sum to 100");
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(e.date)) throw new Error("Invalid date format");
+  return true;
+}
+
+document.getElementById('fixBtn').onclick = async () => {
+  logEl.textContent = "Starting...";
+  try {
+    const ref = collection(db, "events");
+    const snap = await getDocs(ref);
+    let deleted = 0;
+    for(const d of snap.docs){
+      const data = d.data();
+      // vulnerability check: delete only docs with wrong casing
+      if(data.hometeam !== undefined || data.awayteam !== undefined || data.totalseats !== undefined || data.AwayTeam !== undefined || data.HomeTeam !== undefined){
+        await deleteDoc(doc(db, "events", d.id));
+        deleted++;
+        log(`Deleted malformed doc: ${d.id}`);
+      }
+    }
+    log(`Cleanup done. Deleted ${deleted}`);
+
+    const q = query(ref, where("id","==","EV-1"));
+    const exists = await getDocs(q);
+    if(!exists.empty){
+      log("EV-1 already exists. Skipping create. Please refresh your main site.");
+      return;
+    }
+
+    const correctEvent = {
+      id: "EV-1",
+      type: "South Sudan Premier League",
+      homeTeam: "Jamus",
+      awayTeam: "Elmerehk",
+      date: "2026-10-15",
+      homeQuota: 40,
+      awayQuota: 30,
+      fedQuota: 30,
+      totalSeats: 2400,
+      homeLogo: "",
+      awayLogo: "",
+      leagueLogo: "",
+      createdAt: new Date()
+    };
+
+    validateEvent(correctEvent);
+    await addDoc(ref, correctEvent);
+    log("SUCCESS: Created Jamus vs Elmerehk with correct fields (homeTeam, awayTeam, totalSeats)");
+    log("Now open juba-stadium-beta.vercel.app and refresh");
+
+  } catch(err){
+    log("ERROR: " + err.message);
+    console.error(err);
+  }
+};
+</script>
+</body>
+</html>
