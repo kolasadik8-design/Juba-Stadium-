@@ -2,15 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JUBA STADIUM V4 - SECURE</title>
+<title>JUBA STADIUM V5 - PRO</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>.logo-preview{width:40px;height:40px;object-fit:contain;background:#000;border-radius:6px}</style>
 </head>
 <body class="bg-black text-white font-mono text-sm p-2">
 <div id="login" class="max-w-md mx-auto mt-12 bg-zinc-900 p-6 rounded-2xl">
-<h1 class="text-xl font-black text-center">JUBA NATIONAL STADIUM</h1><p class="text-center text-[10px] text-zinc-500 mb-4">SECURE TICKETING V4 - SEAT LOCK + QUOTA</p>
+<h1 class="text-xl font-black text-center">JUBA NATIONAL STADIUM</h1><p class="text-center text-[10px] text-zinc-500 mb-4">SECURE V5 - LOGO + PRO CARD</p>
 <input id="uid" placeholder="Staff ID" class="w-full p-3 rounded bg-black border border-zinc-700 mb-2">
 <input id="pass" type="password" placeholder="Password" class="w-full p-3 rounded bg-black border border-zinc-700 mb-3">
 <button onclick="doLogin()" class="w-full bg-yellow-400 text-black font-black p-3 rounded-xl">LOGIN</button>
@@ -24,41 +25,41 @@
 </div>
 
 <div id="fedPanel" class="hidden bg-zinc-900 p-4 rounded-xl mb-3 border border-yellow-400/30">
-<h2 class="font-black text-yellow-400">FEDERATION - CREATE MATCH / EVENT</h2>
+<h2 class="font-black text-yellow-400">FEDERATION - CREATE MATCH / EVENT + LOGOS</h2>
 <div class="grid md:grid-cols-5 gap-2 mt-2">
-<select id="evType" class="p-2 rounded bg-black border border-zinc-700 col-span-2">
-<optgroup label="SOUTH SUDAN"><option>South Sudan Premier League</option><option>Juba Local League</option><option>South Sudan National Cup</option><option>Super Cup</option></optgroup>
-<optgroup label="CAF"><option>CAF Champions League</option><option>CAF Confederation Cup</option><option>CECAFA Club</option></optgroup>
-<optgroup label="NATIONAL TEAMS"><option>AFCON</option><option>AFCON Qualifiers</option><option>FIFA World Cup Qualifiers</option><option>CECAFA National</option></optgroup>
-<optgroup label="OTHER"><option>Other</option></optgroup>
-</select>
+<select id="evType" class="p-2 rounded bg-black border border-zinc-700 col-span-2"><optgroup label="SOUTH SUDAN"><option>South Sudan Premier League</option><option>Juba Local League</option><option>South Sudan National Cup</option><option>Super Cup</option></optgroup><optgroup label="CAF"><option>CAF Champions League</option><option>CAF Confederation Cup</option><option>CECAFA Club</option></optgroup><optgroup label="NATIONAL TEAMS"><option>AFCON</option><option>AFCON Qualifiers</option><option>FIFA World Cup Qualifiers</option><option>CECAFA National</option></optgroup><optgroup label="OTHER"><option>Other</option></optgroup></select>
 <input id="homeTeam" placeholder="Home Club" class="p-2 rounded bg-black border border-zinc-700">
 <input id="awayTeam" placeholder="Away Club" class="p-2 rounded bg-black border border-zinc-700">
 <input id="evDate" type="date" class="p-2 rounded bg-black border border-zinc-700">
 </div>
+<div class="grid md:grid-cols-3 gap-2 mt-3 bg-black p-3 rounded-xl">
+<div><label class="text-[9px] text-yellow-400">HOME CLUB LOGO</label><input id="homeLogoInp" type="file" accept="image/*" class="w-full text-[10px]"><img id="homeLogoPrev" class="logo-preview mt-1 hidden"></div>
+<div><label class="text-[9px] text-yellow-400">AWAY CLUB LOGO</label><input id="awayLogoInp" type="file" accept="image/*" class="w-full text-[10px]"><img id="awayLogoPrev" class="logo-preview mt-1 hidden"></div>
+<div><label class="text-[9px] text-yellow-400">LEAGUE / CUP LOGO</label><input id="leagueLogoInp" type="file" accept="image/*" class="w-full text-[10px]"><img id="leagueLogoPrev" class="logo-preview mt-1 hidden"></div>
+</div>
 <div class="grid md:grid-cols-4 gap-2 mt-2">
-<div class="bg-black p-2 rounded"><label class="text-[9px]">HOME QUOTA %</label><input id="homeQ" type="number" value="40" class="w-full p-1 rounded bg-zinc-800 border border-zinc-700"></div>
-<div class="bg-black p-2 rounded"><label class="text-[9px]">AWAY QUOTA %</label><input id="awayQ" type="number" value="30" class="w-full p-1 rounded bg-zinc-800 border border-zinc-700"></div>
-<div class="bg-black p-2 rounded"><label class="text-[9px]">FED/STADIUM %</label><input id="fedQ" type="number" value="30" class="w-full p-1 rounded bg-zinc-800 border border-zinc-700"></div>
+<div class="bg-black p-2 rounded"><label class="text-[9px]">HOME QUOTA %</label><input id="homeQ" type="number" value="40" min="0" max="100" class="w-full p-1 rounded bg-zinc-800 border border-zinc-700"></div>
+<div class="bg-black p-2 rounded"><label class="text-[9px]">AWAY QUOTA %</label><input id="awayQ" type="number" value="30" min="0" max="100" class="w-full p-1 rounded bg-zinc-800 border border-zinc-700"></div>
+<div class="bg-black p-2 rounded"><label class="text-[9px]">FED/STADIUM %</label><input id="fedQ" type="number" value="30" min="0" max="100" class="w-full p-1 rounded bg-zinc-800 border border-zinc-700"></div>
 <button onclick="createEvent()" class="bg-yellow-400 text-black font-black rounded">CREATE</button>
 </div>
+<p id="quotaErr" class="text-red-400 text-[11px] mt-1"></p>
 </div>
 
 <div class="grid md:grid-cols-3 gap-3">
 <div class="md:col-span-2 bg-zinc-900 p-4 rounded-xl">
 <div class="flex justify-between mb-2"><h2 class="font-bold">CUT TICKET - ONE SEAT LOCKED FOREVER</h2><select id="activeEvent" class="bg-black border border-zinc-700 rounded px-2 text-xs w-64"></select></div>
-
-<div class="bg-black p-2 rounded mb-2 text-[11px]">STANDS ORDER: <span class="text-yellow-400">VIP (Important Persons)</span> → FIRST CLASS → SECOND CLASS → SEVEN MILE (Third Class)</div>
-
+<div class="bg-black p-2 rounded mb-2 text-[11px]">STANDS ORDER: <span class="text-yellow-400">VIP</span> → FIRST CLASS → SECOND CLASS → SEVEN MILE</div>
 <div class="grid grid-cols-2 gap-2 mb-2">
-<select id="tier" class="p-2 rounded bg-black border border-zinc-700"><option value="VIP">VIP - IMPORTANT PERSONS - 30000 SSP - GATE 3</option><option value="FIRST CLASS">FIRST CLASS - 15000 SSP - GATE 1</option><option value="SECOND CLASS">SECOND CLASS - 7000 SSP - GATE 2</option><option value="SEVEN MILE">SEVEN MILE - THIRD CLASS - 5000 SSP - GATE 4</option></select>
+<select id="tier" class="p-2 rounded bg-black border border-zinc-700"><option value="VIP">VIP - 30000 SSP - GATE 3</option><option value="FIRST CLASS">FIRST CLASS - 15000 SSP - GATE 1</option><option value="SECOND CLASS">SECOND CLASS - 7000 SSP - GATE 2</option><option value="SEVEN MILE">SEVEN MILE - 5000 SSP - GATE 4</option></select>
 <select id="block" class="p-2 rounded bg-black border border-zinc-700"><option>BLOCK A</option><option>BLOCK B</option><option>BLOCK C</option><option>BLOCK D</option></select>
 </div>
 <div class="grid grid-cols-2 gap-2 mb-2"><select id="row" class="p-2 rounded bg-black border border-zinc-700"></select><select id="seat" class="p-2 rounded bg-black border border-zinc-700"></select></div>
 <div class="grid grid-cols-2 gap-2 mb-2"><input id="cName" placeholder="Customer Name" class="p-2 rounded bg-black border border-zinc-700"><input id="cPhone" placeholder="Phone 211..." class="p-2 rounded bg-black border border-zinc-700"></div>
 <div class="bg-black p-2 rounded mb-2 flex justify-between text-xs"><span>ID: <b id="seatIdPreview" class="text-yellow-400">-</b></span><span id="gateDirection" class="text-green-400"></span><span>PRICE: <b id="pricePreview">0</b></span></div>
 <button onclick="cutTicket()" id="cutBtn" class="w-full bg-yellow-400 text-black font-black p-3 rounded-xl">CUT & LOCK SEAT</button>
-<div id="qrcode" class="flex justify-center mt-3"></div><div id="tResult" class="mt-2 text-center text-xs"></div>
+<div id="ticketCard" class="hidden mt-4 bg-white text-black rounded-2xl p-3"></div>
+<div id="qrcode" class="hidden"></div><div id="tResult" class="mt-2 text-center text-xs"></div>
 </div>
 <div class="bg-zinc-900 p-3 rounded-xl"><h3 class="font-bold">LIVE SALES</h3><div id="quotaStatus" class="bg-black p-2 rounded my-2 text-[11px]"></div><div id="ticketList" class="space-y-1 max-h-[600px] overflow-auto text-[11px]"></div></div>
 </div>
@@ -69,55 +70,106 @@ const firebaseConfig={apiKey:"AIzaSyB65erIbKPojeJCtvWCaUPNBqA_YQ6QGJ0",authDomai
 firebase.initializeApp(firebaseConfig); const db=firebase.firestore();
 let currentUser=null, currentEvent=null;
 const PRICE_MAP={"VIP":30000,"FIRST CLASS":15000,"SECOND CLASS":7000,"SEVEN MILE":5000};
-const GATE_MAP={"VIP":"GATE 3 - VIP East (Important Persons)","FIRST CLASS":"GATE 1 - North","SECOND CLASS":"GATE 2 - South","SEVEN MILE":"GATE 4 - West"};
+const GATE_MAP={"VIP":"GATE 3 - VIP East","FIRST CLASS":"GATE 1 - North","SECOND CLASS":"GATE 2 - South","SEVEN MILE":"GATE 4 - West"};
+const ALLOWED_TIERS=Object.keys(PRICE_MAP);
+const ALLOWED_BLOCKS=["BLOCK A","BLOCK B","BLOCK C","BLOCK D"];
 for(let i=1;i<=20;i++)row.innerHTML+=`<option>ROW ${i}</option>`;
 for(let i=1;i<=30;i++)seat.innerHTML+=`<option>SEAT ${i}</option>`;
-function genId(){if(!currentEvent)return;const t=tier.value;const id=`${currentEvent.id}_${t}_${block.value}_${row.value}_${seat.value}`.replace(/\s+/g,'_');seatIdPreview.innerText=id;pricePreview.innerText=PRICE_MAP[t];gateDirection.innerText=GATE_MAP[t];return id;}
+
+let homeLogoData="", awayLogoData="", leagueLogoData="";
+function handleLogo(input, previewId, setter){input.addEventListener('change',e=>{const f=e.target.files[0]; if(!f) return; if(f.size>300*1024){alert('Logo max 300KB'); return;} const r=new FileReader(); r.onload=ev=>{setter(ev.target.result); const img=document.getElementById(previewId); img.src=ev.target.result; img.classList.remove('hidden');}; r.readAsDataURL(f);});}
+handleLogo(homeLogoInp,'homeLogoPrev',d=>homeLogoData=d);
+handleLogo(awayLogoInp,'awayLogoPrev',d=>awayLogoData=d);
+handleLogo(leagueLogoInp,'leagueLogoPrev',d=>leagueLogoData=d);
+
+function genId(){if(!currentEvent)return;const t=tier.value;if(!ALLOWED_TIERS.includes(t))return;const id=`${currentEvent.id}_${t}_${block.value}_${row.value}_${seat.value}`.replace(/\s+/g,'_');seatIdPreview.innerText=id;pricePreview.innerText=PRICE_MAP[t];gateDirection.innerText=GATE_MAP[t];return id;}
 tier.onchange=genId; block.onchange=genId; row.onchange=genId; seat.onchange=genId;
+
 async function doLogin(){
- const id=uid.value.trim(); const d=await db.collection('Juba_users').doc(id).get();
- if(!d.exists||d.data().password!==pass.value.trim()){msg.innerText='INVALID LOGIN';return;}
- currentUser={id,...d.data()}; login.classList.add('hidden'); app.classList.remove('hidden');
- uName.innerText=currentUser.name; uGate.innerText=currentUser.gate; uRole.innerText=currentUser.role;
- if(currentUser.role==='admin') fedPanel.classList.remove('hidden'); loadEvents();
+ const id=uid.value.trim().toUpperCase(); const pw=pass.value.trim();
+ if(!id||!pw){msg.innerText='Enter ID & Password';return;}
+ try{const d=await db.collection('Juba_users').doc(id).get(); if(!d.exists){msg.innerText='INVALID LOGIN';return;} const data=d.data(); if(String(data.password).trim()!==pw){msg.innerText='INVALID LOGIN';return;}
+ currentUser={id,...data}; login.classList.add('hidden'); app.classList.remove('hidden'); uName.innerText=currentUser.name; uGate.innerText=currentUser.gate; uRole.innerText=currentUser.role; if(String(currentUser.role).toLowerCase()==='admin') fedPanel.classList.remove('hidden'); loadEvents();
+ }catch(e){msg.innerText='DB Error: '+e.message;}
 }
+
 async function createEvent(){
- const h=parseInt(homeQ.value),a=parseInt(awayQ.value),f=parseInt(fedQ.value);
- if(h+a+f!==100){alert('Total must 100%');return;}
- const evId='EV-'+Date.now(); await db.collection('events').doc(evId).set({id:evId,type:evType.value,homeTeam:homeTeam.value,awayTeam:awayTeam.value,date:evDate.value,homeQuota:h,awayQuota:a,fedQuota:f,createdAt:firebase.firestore.FieldValue.serverTimestamp(),totalSeats:2400});
- loadEvents();
+ quotaErr.innerText='';
+ const h=parseInt(homeQ.value)||0,a=parseInt(awayQ.value)||0,f=parseInt(fedQ.value)||0;
+ if(h+a+f!==100){quotaErr.innerText=`Total ${h+a+f}% - Must be exactly 100% (e.g 40+30+30)`; return;}
+ if(!homeTeam.value.trim()||!awayTeam.value.trim()||!evDate.value){alert('Fill Home, Away, Date');return;}
+ const evId='EV-'+Date.now();
+ try{
+ await db.collection('events').doc(evId).set({
+   id:evId,type:evType.value.trim(),homeTeam:homeTeam.value.trim(),awayTeam:awayTeam.value.trim(),date:evDate.value,
+   homeQuota:h,awayQuota:a,fedQuota:f,homeLogo:homeLogoData,awayLogo:awayLogoData,leagueLogo:leagueLogoData,
+   createdAt:firebase.firestore.FieldValue.serverTimestamp(),totalSeats:2400,createdBy:currentUser.id
+ });
+ homeTeam.value=''; awayTeam.value=''; homeLogoData=''; awayLogoData=''; leagueLogoData='';
+ homeLogoPrev.classList.add('hidden'); awayLogoPrev.classList.add('hidden'); leagueLogoPrev.classList.add('hidden');
+ homeLogoInp.value=''; awayLogoInp.value=''; leagueLogoInp.value='';
+ loadEvents(); alert('✅ Event Created: '+evId);
+ }catch(e){quotaErr.innerText='Create failed: '+e.message;}
 }
+
 async function loadEvents(){
- const s=await db.collection('events').orderBy('createdAt','desc').limit(20).get(); let o=''; s.forEach(d=>{const e=d.data(); o+=`<option value="${e.id}">${e.type} - ${e.homeTeam} vs ${e.awayTeam}</option>`;});
- activeEvent.innerHTML=o; if(s.docs[0]){currentEvent=s.docs[0].data(); genId(); loadTickets(); loadQuota();}
+ const s=await db.collection('events').orderBy('createdAt','desc').limit(20).get();
+ let o=''; s.forEach(d=>{const e=d.data(); o+=`<option value="${e.id}">${e.date||''} - ${e.type} - ${e.homeTeam} vs ${e.awayTeam}</option>`;});
+ activeEvent.innerHTML=o;
+ if(s.docs[0]){currentEvent=s.docs[0].data(); genId(); loadTickets(); loadQuota();}
  activeEvent.onchange=async()=>{currentEvent=(await db.collection('events').doc(activeEvent.value).get()).data(); genId(); loadTickets(); loadQuota();}
 }
+
 async function loadQuota(){
  if(!currentEvent)return; const s=await db.collection('tickets').where('eventId','==',currentEvent.id).get();
- quotaStatus.innerHTML=`Total Sold: ${s.size} / ${currentEvent.totalSeats}<br>Event: ${currentEvent.homeTeam} vs ${currentEvent.awayTeam}`;
+ quotaStatus.innerHTML=`<b>${currentEvent.homeTeam} vs ${currentEvent.awayTeam}</b><br>Total Sold: ${s.size} / ${currentEvent.totalSeats}<br><img src="${currentEvent.leagueLogo||''}" class="inline w-6 h-6"> ${currentEvent.type}`;
 }
+
 async function cutTicket(){
  if(!currentEvent){alert('Create Event First');return;}
- cutBtn.disabled=true; const seatId=genId(); const tierV=tier.value;
- // SECURE: Price taken from server-side map, not user input
- const finalPrice=PRICE_MAP[tierV]; const finalGate=GATE_MAP[tierV];
+ const tierV=tier.value, blockV=block.value, rowV=row.value, seatV=seat.value;
+ if(!ALLOWED_TIERS.includes(tierV)||!ALLOWED_BLOCKS.includes(blockV)){alert('Invalid tier/block');return;}
+ if(!/^ROW \d+$/.test(rowV)||!/^SEAT \d+$/.test(seatV)){alert('Invalid row/seat');return;}
+ cutBtn.disabled=true;
+ const seatId=genId(); const finalPrice=PRICE_MAP[tierV]; const finalGate=GATE_MAP[tierV];
+ if(!cName.value.trim()){alert('Customer name required'); cutBtn.disabled=false; return;}
  try{
-  await db.runTransaction(async tx=>{
+ await db.runTransaction(async tx=>{
    const ref=db.collection('tickets').doc(seatId); const doc=await tx.get(ref);
    if(doc.exists) throw new Error('SEAT ALREADY TAKEN - '+seatId);
-   tx.set(ref,{ticketId:seatId,eventId:currentEvent.id,eventType:currentEvent.type,tier:tierV,block:block.value,row:row.value,seat:seat.value,price:finalPrice,assignedGate:finalGate,cName:cName.value,cPhone:cPhone.value,soldBy:currentUser.id,soldByName:currentUser.name,soldByGate:currentUser.gate,createdAt:firebase.firestore.FieldValue.serverTimestamp(),used:false,checkedAt:null});
-  });
-  qrcode.innerHTML=''; new QRCode(qrcode,{text:seatId,width:130,height:130});
-  tResult.innerHTML=`✅ LOCKED - ${seatId}<br>GO TO: ${finalGate}`;
-  loadTickets();
+   tx.set(ref,{ticketId:seatId,eventId:currentEvent.id,eventType:currentEvent.type,tier:tierV,block:blockV,row:rowV,seat:seatV,price:finalPrice,assignedGate:finalGate,cName:cName.value.trim().slice(0,30),cPhone:cPhone.value.trim().slice(0,15),soldBy:currentUser.id,soldByName:currentUser.name,soldByGate:currentUser.gate,createdAt:firebase.firestore.FieldValue.serverTimestamp(),used:false,checkedAt:null});
+ });
+ // BUILD PRO CARD
+ const card=document.getElementById('ticketCard'); card.classList.remove('hidden'); card.innerHTML='';
+ const qrDiv=document.createElement('div'); qrDiv.id='qrTemp';
+ card.innerHTML=`
+ <div class="flex justify-between items-center border-b pb-2 mb-2">
+   <img src="${currentEvent.leagueLogo||'https://via.placeholder.com/40?text=LEAGUE'}" class="w-10 h-10 object-contain"><div class="text-center"><div class="font-black text-[11px]">${currentEvent.type}</div><div class="text-[9px] text-zinc-600">${currentEvent.date}</div></div>
+   <div class="text-right text-[9px]">JUBA NATIONAL STADIUM<br><b>${finalGate}</b></div>
+ </div>
+ <div class="flex justify-between items-center my-2">
+   <div class="text-center"><img src="${currentEvent.homeLogo||'https://via.placeholder.com/60?text=HOME'}" class="w-14 h-14 object-contain mx-auto"><div class="font-black mt-1 text-xs">${currentEvent.homeTeam}</div><div class="text-[8px]">HOME ${currentEvent.homeQuota}%</div></div>
+   <div class="text-center font-black text-xl">VS</div>
+   <div class="text-center"><img src="${currentEvent.awayLogo||'https://via.placeholder.com/60?text=AWAY'}" class="w-14 h-14 object-contain mx-auto"><div class="font-black mt-1 text-xs">${currentEvent.awayTeam}</div><div class="text-[8px]">AWAY ${currentEvent.awayQuota}%</div></div>
+ </div>
+ <div class="bg-black text-white rounded-lg p-2 flex justify-between text-[10px]">
+   <div>TIER: <b class="text-yellow-400">${tierV}</b><br>${blockV} ${rowV} ${seatV}</div>
+   <div class="text-right">CUSTOMER: ${cName.value}<br>PRICE: <b class="text-yellow-400">${finalPrice} SSP</b><br>ID: ${seatId.slice(-20)}</div>
+ </div>
+ <div class="flex justify-center mt-3 bg-zinc-100 p-2 rounded"><div id="qrcodeInner"></div></div>
+ <div class="text-center text-[8px] mt-1 text-zinc-500">Scan at ${finalGate} - One seat locked forever - No resale</div>
+ `;
+ // generate QR inside card
+ setTimeout(()=>{ new QRCode(document.getElementById('qrcodeInner'),{text:seatId,width:110,height:110}); },100);
+ tResult.innerHTML=`✅ LOCKED - ${seatId}`;
+ loadTickets(); loadQuota();
  }catch(e){tResult.innerHTML=`<span class="text-red-400">❌ ${e.message}</span>`;}
  cutBtn.disabled=false;
 }
 async function loadTickets(){
  if(!currentEvent)return; const s=await db.collection('tickets').where('eventId','==',currentEvent.id).orderBy('createdAt','desc').limit(100).get();
- let h=''; s.forEach(d=>{const x=d.data(); h+=`<div class="bg-black p-1 rounded flex justify-between"><span>${x.tier.slice(0,3)} ${x.block} ${x.row} ${x.seat}</span><span>${x.assignedGate.split(' - ')[0]}</span><span class="text-yellow-400">${x.price}</span></div>`;});
- ticketList.innerHTML=h;
+ let h=''; s.forEach(d=>{const x=d.data(); h+=`<div class="bg-black p-1 rounded flex justify-between"><span>${x.tier.slice(0,3)} ${x.block} ${x.row} ${x.seat}</span><span>${x.assignedGate.split(' - ')[0]}</span><span class="text-yellow-400">${x.price}</span></div>`;}); ticketList.innerHTML=h;
 }
 </script>
 </body>
-</html>
+ </html>
