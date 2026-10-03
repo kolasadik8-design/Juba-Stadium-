@@ -1,1 +1,20 @@
-
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Go</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head><body style="background:#000;display:flex;align-items:center;justify-content:center;height:100vh;margin:0">
+<button id="b" style="padding:22px 40px;background:#1e5bff;color:#fff;border:0;border-radius:14px;font-weight:800;font-size:20px">⚡ دوس هنا</button>
+<script>
+const cfg={apiKey:"AIzaSyAJeu6fPQuTd7kIBngbH7LxZnCKRQGXCk0",authDomain:"juba-stadium-247f3.firebaseapp.com",projectId:"juba-stadium-247f3"};
+firebase.initializeApp(cfg); const db=firebase.firestore();
+document.getElementById('b').onclick=async()=>{
+let x=document.getElementById('b'); x.textContent="⏳ جاري...";
+try{
+await db.collection("employees").doc("ADMIN").set({name:"Admin",password:"Admin@Juba2026!",gate:"ALL",role:"admin",disabled:false});
+await db.collection("employees").doc("EMP-101").set({name:"John Gate 1",password:"Juba@2026_101",gate:"GATE 1",role:"ticketing",disabled:false});
+await db.collection("employees").doc("EMP-102").set({name:"Sarah Gate 2",password:"Juba@2026_102",gate:"GATE 2",role:"ticketing",disabled:false});
+await db.collection("stadium_config").doc("prices").set({vip:50000,a:30000,b:20000});
+await db.collection("events").doc("EV-1").set({id:"EV-1",homeTeam:"Jamus",awayTeam:"Elmerehk",date:"2026-10-15",type:"Premier League",totalSeats:2400,homeQuota:40,awayQuota:30,fedQuota:30,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+x.textContent="✅ DONE"; x.style.background="#00c950"; alert("تم - ارجع Firebase");
+}catch(e){x.textContent="خطأ: "+e.message; x.style.background="red";}
+}
+</script></body></html>
