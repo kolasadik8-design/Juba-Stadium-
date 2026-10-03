@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>JUBA NATIONAL STADIUM - Ticketing</title>
+<title>JUBA NATIONAL STADIUM - Ticketing System</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -10,205 +10,186 @@
 <style>
 :root{--blue:#1e5bff;--red:#ff2d2d;--green:#00c950;--yellow:#ffcc00;--bg:#070a14;--card:#12172a;--line:#1f2742}
 *{box-sizing:border-box;font-family:Inter,sans-serif}body{margin:0;background:var(--bg);color:#fff}
-header{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:#0a0e1f;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
-.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;cursor:pointer}
-.logo b{color:var(--yellow)}nav{display:flex;gap:22px;font-size:13px;font-weight:600;opacity:.8}
-nav span.active{color:var(--yellow);border-bottom:2px solid var(--yellow);padding-bottom:4px}
-.hero{padding:28px 22px;background:radial-gradient(800px 300px at 20% 10%,#1a2350 0,#070a14 70%)}
-.hero h1{font-size:38px;margin:0 0 10px;line-height:1.1}.hero p{opacity:.7;max-width:520px;font-size:14px}
-.btns{margin-top:16px;display:flex;gap:12px;flex-wrap:wrap}.btn{padding:12px 22px;border-radius:28px;border:0;font-weight:700;cursor:pointer}
-.btn-blue{background:var(--blue);color:#fff}.btn-green{background:transparent;border:1px solid var(--green);color:var(--green)}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;background:#0a0e1f;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.logo{font-weight:800;font-size:18px}.logo b{color:var(--yellow)}
 .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;padding:18px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;position:relative;overflow:hidden}
-.card-top{height:6px;display:flex}.card-top div{flex:1}
-.status{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}
-.up{background:var(--green)}.used{background:var(--red)}.qr{background:#fff;padding:8px;border-radius:10px;display:inline-block}
-.sec{padding:0 22px 22px}
-input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#0d1226;color:#fff;margin-top:8px}
-.login-modal{position:fixed;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;z-index:99}
-.login-box{background:#12172a;border:1px solid var(--line);padding:22px;border-radius:18px;width:90%;max-width:380px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.qr{background:#fff;padding:8px;border-radius:10px;display:inline-block}
+input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:#0d1226;color:#fff;margin-top:8px;outline:none}
+input:focus,select:focus{border-color:var(--blue)}
+.btn{padding:13px 22px;border-radius:12px;border:0;font-weight:800;cursor:pointer;width:100%}
+.btn-blue{background:var(--blue);color:#fff}
+.login-modal{position:fixed;inset:0;background:rgba(0,0,0,.97);display:flex;align-items:center;justify-content:center;z-index:99}
+.login-box{background:#12172a;border:1px solid var(--line);padding:24px;border-radius:18px;width:90%;max-width:380px}
 .gate-tag{background:#1e2a55;color:#7aa2ff;padding:3px 8px;border-radius:6px;font-size:11px}
-@media(max-width:800px){.grid{grid-template-columns:1fr}nav{display:none}.hero h1{font-size:28px}}
-@media print{header,.hero,.sec,.btns,nav,#empInfo{display:none !important}.grid{grid-template-columns:1fr}body{background:#fff;color:#000}.card{border:1px solid #000;color:#000}}
+.status{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}.up{background:var(--green)}.used{background:var(--red)}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header>
-<div class="logo" id="secretLogo">🛡️ JUBA NATIONAL STADIUM <b>TICKETING</b></div>
-<nav><span class="active">TICKETS</span><span onclick="location.href='scan.html'">SCANNER 📷</span><span onclick="location.href='admin.html'">ADMIN</span></nav>
+<div class="logo">🛡️ JUBA NATIONAL STADIUM <b>TICKETING</b></div>
 <div id="empInfo" style="font-size:12px;background:#1e2a55;padding:6px 10px;border-radius:20px;display:none"></div>
 </header>
 
-<div class="hero">
-<h1>Secure Your Seat — Live Matches</h1>
-<p>Book tickets for upcoming events. Fast, secure, and instant digital tickets with QR code entry.</p>
-<div class="btns">
-<button class="btn btn-blue" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">→ Browse Matches</button>
-<button class="btn btn-green" onclick="location.href='scan.html'">📷 Scan Ticket</button>
-</div>
-</div>
-
+<div id="mainContent" style="display:none">
 <div class="grid">
-<div class="card" id="booking">
-<div class="card-top"><div style="background:var(--blue)"></div><div style="background:var(--red)"></div><div style="background:var(--green)"></div><div style="background:var(--yellow)"></div></div>
-<div style="margin-top:12px"><span class="status up">● UPCOMING</span> <small id="previewId" style="opacity:.6">Ticket #JUBA-M...</small></div>
-<h2 style="margin:10px 0 4px" id="matchTitle">Select Match</h2>
-<small style="opacity:.6" id="matchInfo">Loading matches...</small>
-<hr style="border:0;border-top:1px dashed #2a345f;margin:12px 0">
-<div style="display:flex;gap:18px;flex-wrap:wrap">
-<div style="flex:1;min-width:200px">
-<div style="font-size:11px;color:var(--yellow)">CUSTOMER NAME</div><input id="custName" placeholder="Full Name" maxlength="50">
-<div style="font-size:11px;color:var(--yellow);margin-top:10px">GATE / البوابة</div><select id="gateSelect"><option>GATE 1 - North</option><option>GATE 2 - South</option><option>GATE 3 - VIP East</option><option>GATE 4 - West</option></select>
-<div style="font-size:11px;color:var(--yellow);margin-top:10px">CATEGORY</div><select id="catSelect"><option value="vip">VIP - Loading...</option></select>
-<div style="font-size:11px;color:var(--yellow);margin-top:10px">QUANTITY / العدد (1-10)</div>
-<select id="qtySelect"><option value="1">1 Ticket</option><option value="2">2 Tickets</option><option value="3">3 Tickets</option><option value="4">4 Tickets</option><option value="5">5 Tickets</option><option value="6">6 Tickets</option><option value="7">7 Tickets</option><option value="8">8 Tickets</option><option value="9">9 Tickets</option><option value="10">10 Tickets (Max)</option></select>
-<div style="margin-top:12px"><button class="btn btn-blue" style="border-radius:12px;width:100%" onclick="issueTicket()">Issue Ticket + QR</button></div>
-</div>
-<div style="text-align:center"><div id="qrcode" class="qr"></div><div style="font-size:10px;margin-top:6px;opacity:.6">SCAN AT ENTRY</div><div style="font-size:11px;color:var(--green);margin-top:8px">● Valid • Non-transferable</div></div>
-</div>
-</div>
 <div class="card">
-<h3 style="margin:0 0 12px;border-bottom:1px solid var(--line);padding-bottom:10px">MY TICKETS <button onclick="loadTickets()" style="float:right;background:#1f2742;color:#fff;border:0;padding:4px 8px;border-radius:6px;font-size:10px">Refresh</button></h3>
-<div id="ticketsList" style="max-height:600px;overflow:auto"></div>
+<div style="height:6px;display:flex;border-radius:3px;overflow:hidden;margin:-16px -16px 16px"><div style="flex:1;background:var(--blue)"></div><div style="flex:1;background:var(--red)"></div><div style="flex:1;background:var(--green)"></div><div style="flex:1;background:var(--yellow)"></div></div>
+<span class="status up">● UPCOMING</span> <small id="previewId" style="opacity:.6">Ticket #JUBA-M...</small>
+<h2 id="matchTitle" style="margin:10px 0 4px">Select Match</h2><small id="matchInfo" style="opacity:.6">Loading...</small>
+<hr style="border:0;border-top:1px dashed #2a345f;margin:14px 0">
+<div style="font-size:11px;color:var(--yellow);font-weight:700">CUSTOMER NAME</div><input id="custName" placeholder="Full Name" maxlength="50" autocomplete="off">
+<div style="font-size:11px;color:var(--yellow);font-weight:700;margin-top:12px">GATE</div><select id="gateSelect"><option>GATE 1 - North</option><option>GATE 2 - South</option><option>GATE 3 - VIP East</option><option>GATE 4 - West</option></select>
+<div style="font-size:11px;color:var(--yellow);font-weight:700;margin-top:12px">CATEGORY</div><select id="catSelect"><option value="vip">VIP - Loading...</option></select>
+<div style="font-size:11px;color:var(--yellow);font-weight:700;margin-top:12px">QUANTITY (1-10)</div><select id="qtySelect"><option value="1">1 Ticket</option><option value="2">2 Tickets</option><option value="3">3 Tickets</option><option value="4">4 Tickets</option><option value="5">5 Tickets</option><option value="10">10 Tickets</option></select>
+<button class="btn btn-blue" style="margin-top:16px" onclick="issueTicket()">Issue Ticket + QR</button>
+<div style="text-align:center;margin-top:14px"><div id="qrcode" class="qr"></div><div style="font-size:10px;opacity:.5;margin-top:6px">SCAN AT ENTRY</div></div>
 </div>
+<div class="card"><h3 style="margin:0 0 12px">MY TICKETS</h3><div id="ticketsList" style="max-height:600px;overflow:auto"></div></div>
 </div>
-
-<div class="sec">
-<h3>UPCOMING MATCHES</h3>
-<div id="matchesList"></div>
+<div style="padding:0 18px 18px"><h3>UPCOMING MATCHES</h3><div id="matchesList"></div></div>
 </div>
 
 <div class="login-modal" id="loginModal">
 <div class="login-box">
-<h3>🔒 Employee Login Required</h3><small style="opacity:.6">الموقع مقفول - ادخل حساب الموظف</small>
-<input id="empId" placeholder="Employee ID e.g EMP-101"><input id="empPass" type="password" placeholder="Password">
-<button class="btn btn-blue" style="width:100%;margin-top:12px;border-radius:12px" onclick="loginEmp()">Login</button>
-<p id="loginErr" style="color:#ff5a5a;font-size:12px;margin-top:8px;display:none"></p>
-<small style="opacity:.5;display:block;margin-top:10px;text-align:center">Admin: admin / admin<br>Staff: EMP-101 / 1234</small>
+<h3 style="margin:0 0 6px">🔒 Employee Login</h3><p style="opacity:.6;font-size:13px;margin:0 0 16px">Secure access - Authorized personnel only</p>
+<div style="font-size:11px;opacity:.7;margin-bottom:4px">EMPLOYEE ID</div><input id="empId" placeholder="e.g. EMP-101" autocomplete="off">
+<div style="font-size:11px;opacity:.7;margin:12px 0 4px">PASSWORD</div><input id="empPass" type="password" placeholder="••••••••">
+<button class="btn btn-blue" style="margin-top:18px" onclick="loginEmp()">Login</button>
+<p id="loginErr" style="color:#ff5a5a;font-size:12px;margin-top:10px;display:none"></p>
 </div>
 </div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyAJeu6fPQuTd7kIBngbH7LxZnCKRQGXCk0",
-  authDomain: "juba-stadium-247f3.firebaseapp.com",
-  projectId: "juba-stadium-247f3",
-  storageBucket: "juba-stadium-247f3.firebasestorage.app",
-  messagingSenderId: "314725857339",
-  appId: "1:314725857339:web:79885c6c7bddb21997841e"
-};
+const firebaseConfig = { apiKey: "AIzaSyAJeu6fPQuTd7kIBngbH7LxZnCKRQGXCk0", authDomain: "juba-stadium-247f3.firebaseapp.com", projectId: "juba-stadium-247f3", storageBucket: "juba-stadium-247f3.firebasestorage.app", messagingSenderId: "314725857339", appId: "1:314725857339:web:79885c6c7bddb21997841e" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+db.settings({ experimentalAutoDetectLongPolling: true });
 
-let currentEmp = null;
-let prices = {vip:50000,a:30000,b:20000};
-let currentEvent = null;
-
+let currentEmp=null, prices={vip:50000,a:30000,b:20000}, currentEvent=null;
 function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
-const loginModal = document.getElementById('loginModal');
-loginModal.style.display = 'flex';
-
-// استرجاع الجلسة
 try{
-  const s=JSON.parse(localStorage.getItem('juba_emp'));
-  if(s && s.id){
-    currentEmp=s;
-    document.getElementById('empInfo').style.display='block';
-    document.getElementById('empInfo').innerHTML=`👤 ${esc(s.name)} | <span class="gate-tag">${esc(s.gate||'')}</span> | <a onclick="logout()" style="cursor:pointer;color:#ffcc00">Logout</a>`;
-    loginModal.style.display='none';
-  }
+ const saved=JSON.parse(localStorage.getItem('juba_emp'));
+ if(saved && saved.id){
+  currentEmp=saved;
+  document.getElementById('empInfo').style.display='block';
+  document.getElementById('empInfo').innerHTML=`👤 ${esc(saved.name)} | <span class="gate-tag">${esc(saved.gate||'')}</span> | <a onclick="logout()" style="cursor:pointer;color:var(--yellow)">Logout</a>`;
+  document.getElementById('loginModal').style.display='none';
+  document.getElementById('mainContent').style.display='block';
+  loadAll();
+ }
 }catch{}
 
 function loginEmp(){
-  const id = document.getElementById('empId').value.trim();
-  const pass = document.getElementById('empPass').value.trim();
-  if(!id||!pass) return showErr("اكتب ID والباسورد");
-  db.collection('employees').doc(id).get().then(doc=>{
-    if(!doc.exists) return showErr("الموظف غير موجود");
-    const d=doc.data();
-    if(d.password!==pass) return showErr("باسورد خطأ");
-    currentEmp={id,...d};
-    localStorage.setItem('juba_emp',JSON.stringify(currentEmp));
-    document.getElementById('empInfo').style.display='block';
-    document.getElementById('empInfo').innerHTML=`👤 ${esc(d.name)} | <span class="gate-tag">${esc(d.gate||'')}</span> | <a onclick="logout()" style="cursor:pointer;color:#ffcc00">Logout</a>`;
-    loginModal.style.display='none';
-    loadPrices(); loadTickets(); loadEvents();
-  }).catch(e=>showErr(e.message));
+ const id=document.getElementById('empId').value.trim();
+ const pass=document.getElementById('empPass').value.trim();
+ const err=document.getElementById('loginErr');
+ if(!id||!pass){ err.style.display='block'; err.textContent="Please enter ID and password"; return; }
+ if(id.length>30||pass.length>50){ err.style.display='block'; err.textContent="Invalid input length"; return; }
+ err.style.display='block'; err.style.color='#7aa2ff'; err.textContent="Connecting...";
+ db.collection('employees').doc(id).get().then(doc=>{
+  if(!doc.exists){ err.style.color='#ff5a5a'; err.textContent="Employee not found"; return; }
+  const data=doc.data();
+  if(typeof data.password!=='string'||data.password!==pass){ err.style.color='#ff5a5a'; err.textContent="Incorrect password"; return; }
+  if(data.disabled===true){ err.style.color='#ff5a5a'; err.textContent="Account disabled"; return; }
+  currentEmp={id,...data};
+  localStorage.setItem('juba_emp',JSON.stringify(currentEmp));
+  document.getElementById('loginModal').style.display='none';
+  document.getElementById('mainContent').style.display='block';
+  document.getElementById('empInfo').style.display='block';
+  document.getElementById('empInfo').innerHTML=`👤 ${esc(data.name)} | <span class="gate-tag">${esc(data.gate||'')}</span> | <a onclick="logout()" style="cursor:pointer;color:var(--yellow)">Logout</a>`;
+  loadAll();
+ }).catch(e=>{
+  err.style.color='#ff5a5a';
+  if(e.message.includes('offline')) err.textContent="Offline error. Check internet and Firestore Rules.";
+  else err.textContent="Connection failed: "+e.message;
+ });
 }
-function showErr(m){ const el=document.getElementById('loginErr'); el.style.display='block'; el.textContent=m; }
 function logout(){ localStorage.removeItem('juba_emp'); location.reload(); }
+function loadAll(){ loadPrices(); loadEvents(); loadTickets(); }
 
 function loadPrices(){
-  db.collection('stadium_config').doc('prices').get().then(d=>{
-    if(d.exists){
-      prices=d.data();
-      const sel=document.getElementById('catSelect');
-      sel.innerHTML=`<option value="vip">VIP - ${Number(prices.vip).toLocaleString()} SSP</option><option value="a">Category A - ${Number(prices.a).toLocaleString()} SSP</option><option value="b">Category B - ${Number(prices.b).toLocaleString()} SSP</option>`;
-    }
-  });
+ db.collection('stadium_config').doc('prices').get().then(d=>{
+  if(d.exists){
+   const p=d.data();
+   if(Number.isInteger(p.vip)&&Number.isInteger(p.a)&&Number.isInteger(p.b)){
+    prices=p;
+    document.getElementById('catSelect').innerHTML=`<option value="vip">VIP - ${Number(p.vip).toLocaleString()} SSP</option><option value="a">Category A - ${Number(p.a).toLocaleString()} SSP</option><option value="b">Category B - ${Number(p.b).toLocaleString()} SSP</option>`;
+   }
+  }
+ }).catch(()=>{});
 }
-loadPrices();
 
 function loadEvents(){
-  db.collection('events').orderBy('createdAt','desc').limit(20).onSnapshot(s=>{
-    let html=""; let first=null;
-    s.forEach(doc=>{
-      const ev=doc.data(); if(!ev.homeTeam||!ev.awayTeam) return;
-      if(!first) first={id:doc.id,...ev};
-      html+=`<div style="display:flex;justify-content:space-between;align-items:center;background:#12172a;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px"><div><b>${esc(ev.homeTeam)} vs ${esc(ev.awayTeam)}</b><br><small style="opacity:.6">${esc(ev.date||'')} • ${ev.totalSeats||0} seats</small></div><button style="background:var(--yellow);color:#000;border:0;border-radius:20px;padding:8px 16px;font-weight:800;cursor:pointer" onclick="selectEvent('${doc.id}')">Select</button></div>`;
-    });
-    document.getElementById('matchesList').innerHTML=html||"<small style='opacity:.5'>No matches</small>";
-    if(first) selectEvent(first.id, first);
+ db.collection('events').orderBy('createdAt','desc').limit(20).onSnapshot(s=>{
+  let html=""; let first=null;
+  s.forEach(doc=>{
+   const ev=doc.data();
+   if(!ev.homeTeam||!ev.awayTeam||typeof ev.homeTeam!=='string') return;
+   if(ev.homeTeam.length>50||ev.awayTeam.length>50) return;
+   if(!first) first={id:doc.id,...ev};
+   html+=`<div style="display:flex;justify-content:space-between;align-items:center;background:#12172a;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px"><div><b>${esc(ev.homeTeam)} vs ${esc(ev.awayTeam)}</b><br><small style="opacity:.6">${esc(ev.date||'')} • ${Number(ev.totalSeats||0)} seats</small></div><button style="background:var(--yellow);color:#000;border:0;border-radius:20px;padding:8px 16px;font-weight:800;cursor:pointer" onclick="selectEvent('${esc(doc.id)}')">Select</button></div>`;
   });
+  document.getElementById('matchesList').innerHTML=html||"<small style='opacity:.5'>No matches found</small>";
+  if(first){ currentEvent=first; document.getElementById('matchTitle').textContent=first.homeTeam+' vs '+first.awayTeam; document.getElementById('matchInfo').textContent=(first.date||'')+' • '+(first.type||''); }
+ });
 }
-window.selectEvent = (id, evData=null) => {
-  if(evData){ currentEvent=evData; document.getElementById('matchTitle').textContent=evData.homeTeam+' vs '+evData.awayTeam; document.getElementById('matchInfo').textContent=(evData.date||'')+' • '+(evData.type||''); return; }
-  db.collection('events').doc(id).get().then(d=>{
-    if(d.exists){ currentEvent={id:d.id,...d.data()}; document.getElementById('matchTitle').textContent=currentEvent.homeTeam+' vs '+currentEvent.awayTeam; document.getElementById('matchInfo').textContent=currentEvent.date+' • '+currentEvent.type; }
-  });
+
+window.selectEvent=(id)=>{
+ db.collection('events').doc(id).get().then(d=>{
+  if(d.exists){ const ev=d.data(); if(!ev.homeTeam||!ev.awayTeam) return; currentEvent={id:d.id,...ev}; document.getElementById('matchTitle').textContent=ev.homeTeam+' vs '+ev.awayTeam; document.getElementById('matchInfo').textContent=(ev.date||'')+' • '+(ev.type||''); document.getElementById('booking').scrollIntoView({behavior:'smooth'}); }
+ });
 }
-loadEvents();
 
 async function issueTicket(){
-  if(!currentEmp){ loginModal.style.display='flex'; return; }
-  if(!currentEvent) return alert("Select a match first");
-  const rawName=document.getElementById('custName').value.trim();
-  if(rawName.length<3 || rawName.length>50) return alert("اسم العميل 3-50 حرف");
-  if(/[<>"']/.test(rawName)) return alert("اسم غير صالح");
-  const name=esc(rawName);
-  const gate=document.getElementById('gateSelect').value;
-  const cat=document.getElementById('catSelect').value;
-  let qty = parseInt(document.getElementById('qtySelect').value)||1; if(qty>10) qty=10;
+ if(!currentEmp){ document.getElementById('loginModal').style.display='flex'; return; }
+ if(!currentEvent){ alert("Please select a match first"); return; }
+ const rawName=document.getElementById('custName').value.trim();
+ if(rawName.length<3||rawName.length>50){ alert("Customer name must be 3-50 characters"); return; }
+ if(/[<>"'`;]/.test(rawName)){ alert("Invalid characters in name"); return; }
+ const safeName=esc(rawName);
+ const gate=document.getElementById('gateSelect').value;
+ const cat=document.getElementById('catSelect').value;
+ if(!['vip','a','b'].includes(cat)){ alert("Invalid category"); return; }
+ let qty=parseInt(document.getElementById('qtySelect').value)||1;
+ if(!Number.isInteger(qty)||qty<1) qty=1; if(qty>10) qty=10;
+
+ try{
   const pdoc=await db.collection('stadium_config').doc('prices').get();
   const realPrices=pdoc.exists?pdoc.data():prices;
-  let amount = cat==='vip'?Number(realPrices.vip):cat==='a'?Number(realPrices.a):Number(realPrices.b); if(!amount||amount<1000) amount=5000;
+  let amount=cat==='vip'?Number(realPrices.vip):cat==='a'?Number(realPrices.a):Number(realPrices.b);
+  if(!Number.isFinite(amount)||amount<1000||amount>1000000){ amount=5000; }
+
   const batch=db.batch(); const tickets=[];
   for(let i=0;i<qty;i++){
-    const ticketId="JUBA-M"+Date.now().toString().slice(-6)+Math.random().toString(36).substring(2,5).toUpperCase()+i;
-    const data={ id:ticketId, customer:rawName, customerSafe:name, gate, category:cat, amount, eventId:currentEvent.id, eventName: currentEvent.homeTeam+' vs '+currentEvent.awayTeam, qty, ticketIndex:i+1, issuedBy:currentEmp.id, issuedByName:currentEmp.name, created:firebase.firestore.FieldValue.serverTimestamp(), used:false };
-    batch.set(db.collection('juba_tickets').doc(ticketId), data); tickets.push(data);
+   const ticketId="JUBA-M"+Date.now().toString().slice(-6)+Math.random().toString(36).substring(2,5).toUpperCase()+i;
+   const data={ id:ticketId, customer:rawName, customerSafe:safeName, gate, category:cat, amount, eventId:currentEvent.id, eventName:currentEvent.homeTeam+' vs '+currentEvent.awayTeam, qty, ticketIndex:i+1, issuedBy:currentEmp.id, issuedByName:currentEmp.name, created:firebase.firestore.FieldValue.serverTimestamp(), used:false };
+   batch.set(db.collection('juba_tickets').doc(ticketId), data);
+   tickets.push(data);
   }
   await batch.commit();
-  let html=`<div id="printArea"><div style="background:#1e5bff;color:#fff;padding:8px;border-radius:8px;margin-bottom:10px;text-align:center">✅ ${qty} Tickets Issued for ${esc(currentEvent.homeTeam)} vs ${esc(currentEvent.awayTeam)}</div>`;
-  tickets.forEach(t=>{ html+=`<div class="card" style="text-align:center;margin-top:10px"><div style="font-size:12px;opacity:.6">Ticket ${t.ticketIndex}/${t.qty} #${esc(t.id)}</div><h3 style="margin:6px 0">${esc(t.eventName)}</h3><div>${t.customerSafe} • ${esc(t.gate)} • ${esc(t.category.toUpperCase())}</div><div style="font-weight:800;color:var(--yellow);margin:6px 0">${Number(t.amount).toLocaleString()} SSP</div><div id="qr-${t.id}" class="qr" style="margin:10px auto"></div><div style="font-size:10px;opacity:.6">SCAN AT ENTRY</div></div>`; });
-  html+=`</div><button onclick="window.print()" style="width:100%;margin-top:12px;background:var(--yellow);color:#000;border:0;padding:12px;border-radius:10px;font-weight:800">🖨️ Print All ${qty}</button>`;
+  let html=`<div style="background:var(--blue);color:#fff;padding:10px;border-radius:10px;text-align:center;margin-bottom:12px">✅ ${qty} Ticket(s) Issued - ${esc(currentEvent.homeTeam)} vs ${esc(currentEvent.awayTeam)}</div>`;
+  tickets.forEach(t=>{ html+=`<div style="background:#12172a;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;margin-top:10px"><div style="font-size:12px;opacity:.6">Ticket ${t.ticketIndex}/${t.qty} #${esc(t.id)}</div><h3 style="margin:6px 0">${esc(t.eventName)}</h3><div>${t.customerSafe} • ${esc(t.gate)} • ${esc(t.category.toUpperCase())}</div><div style="font-weight:800;color:var(--yellow);margin:6px 0">${Number(t.amount).toLocaleString()} SSP</div><div id="qr-${t.id}" class="qr" style="margin:10px auto"></div></div>`; });
   document.getElementById('ticketsList').innerHTML=html;
-  tickets.forEach(t=>{ new QRCode(document.getElementById(`qr-${t.id}`),{text:`${t.id}|${t.gate}|${t.amount}`,width:120,height:120}); });
-  document.getElementById('custName').value=""; document.getElementById('previewId').textContent="Last: "+tickets[0].id;
+  tickets.forEach(t=>{ new QRCode(document.getElementById(`qr-${t.id}`),{text:`${t.id}|${t.gate}|${t.amount}`,width:130,height:130}); });
+  document.getElementById('custName').value="";
+  document.getElementById('previewId').textContent="Last: "+tickets[0].id;
+ }catch(e){ alert("Issue failed: "+e.message); }
 }
 
 function loadTickets(){
-  if(!currentEmp) return;
-  db.collection('juba_tickets').orderBy('created','desc').limit(50).onSnapshot(s=>{
-    let html=""; s.forEach(doc=>{
-      const t=doc.data(); const used=t.used?`<span class="status used">USED</span>`:`<span class="status up">VALID</span>`;
-      html+=`<div style="border-bottom:1px solid #1f2742;padding:10px 0;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:12px;font-weight:700">${esc(t.id)} ${used}</div><div style="font-size:11px;opacity:.7">${esc(t.customer||'')} • ${esc(t.gate||'')} • ${esc(t.eventName||'')}</div></div></div>`;
-    });
-    document.getElementById('ticketsList').innerHTML=html||"<small style='opacity:.5'>No tickets yet</small>";
+ if(!currentEmp) return;
+ db.collection('juba_tickets').orderBy('created','desc').limit(40).onSnapshot(s=>{
+  let html=""; s.forEach(doc=>{
+   const t=doc.data();
+   const status=t.used?`<span class="status used">USED</span>`:`<span class="status up">VALID</span>`;
+   html+=`<div style="border-bottom:1px solid var(--line);padding:10px 0;display:flex;justify-content:space-between"><div><div style="font-size:12px;font-weight:700">${esc(t.id)} ${status}</div><div style="font-size:11px;opacity:.7">${esc(t.customerSafe||t.customer||'')} • ${esc(t.gate||'')}</div></div><div style="font-size:11px;color:var(--yellow)">${Number(t.amount||0).toLocaleString()} SSP</div></div>`;
   });
+  document.getElementById('ticketsList').innerHTML=html||"<small style='opacity:.5'>No tickets yet</small>";
+ });
 }
-loadTickets();
 </script>
 </body>
 </html>
