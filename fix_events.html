@@ -11,18 +11,17 @@
 <p>Deletes malformed fields (hometeam, totalseats) and creates correct one.</p>
 <button id="fixBtn">Run Secure Fix</button>
 <pre id="log">Ready...</pre>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDbPsfTygtodq8THsbSNZ4y2UTO0qHgr_4",
-  authDomain: "ssnps-police-app-7018f.firebaseapp.com",
-  projectId: "ssnps-police-app-7018f",
-  storageBucket: "ssnps-police-app-7018f.firebasestorage.app",
-  messagingSenderId: "705275454318",
-  appId: "1:705275454318:web:4ac5261ba5beb6c33d977f"
+const firebaseConfig = { 
+  apiKey: "AIzaSyAJeu6fPQuTd7kIBngbH7LxZnCKRQGXCk0", 
+  authDomain: "juba-stadium-247f3.firebaseapp.com", 
+  projectId: "juba-stadium-247f3", 
+  storageBucket: "juba-stadium-247f3.firebasestorage.app", 
+  messagingSenderId: "314725857339", 
+  appId: "1:314725857339:web:79885c6c7bddb21997841e" 
 };
 
 const app = initializeApp(firebaseConfig);
@@ -47,7 +46,6 @@ document.getElementById('fixBtn').onclick = async () => {
     let deleted = 0;
     for(const d of snap.docs){
       const data = d.data();
-      // vulnerability check: delete only docs with wrong casing
       if(data.hometeam !== undefined || data.awayteam !== undefined || data.totalseats !== undefined || data.AwayTeam !== undefined || data.HomeTeam !== undefined){
         await deleteDoc(doc(db, "events", d.id));
         deleted++;
@@ -55,14 +53,12 @@ document.getElementById('fixBtn').onclick = async () => {
       }
     }
     log(`Cleanup done. Deleted ${deleted}`);
-
     const q = query(ref, where("id","==","EV-1"));
     const exists = await getDocs(q);
     if(!exists.empty){
       log("EV-1 already exists. Skipping create. Please refresh your main site.");
       return;
     }
-
     const correctEvent = {
       id: "EV-1",
       type: "South Sudan Premier League",
@@ -78,12 +74,10 @@ document.getElementById('fixBtn').onclick = async () => {
       leagueLogo: "",
       createdAt: new Date()
     };
-
     validateEvent(correctEvent);
     await addDoc(ref, correctEvent);
     log("SUCCESS: Created Jamus vs Elmerehk with correct fields (homeTeam, awayTeam, totalSeats)");
     log("Now open juba-stadium-beta.vercel.app and refresh");
-
   } catch(err){
     log("ERROR: " + err.message);
     console.error(err);
