@@ -1,25 +1,19 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Create Employees</title></head><body style="background:#070a14;color:#fff;font-family:system-ui;padding:24px">
-<h2>Create Employees - juba-stadium-247f3</h2>
-<button id="btn" style="padding:14px 24px;background:#1e5bff;color:#fff;border:0;border-radius:10px;font-weight:800">Create Employees Now</button>
-<pre id="log" style="background:#111;padding:12px;border-radius:8px;margin-top:12px"></pre>
+<!DOCTYPE html><html><body style="background:#000;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:sans-serif">
+<button id="btn" style="padding:22px 40px;background:#1e5bff;color:#fff;border:0;border-radius:14px;font-weight:800;font-size:20px;cursor:pointer">⚡ دوس هنا عشان تنزل الداتا</button>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-const firebaseConfig = { apiKey: "AIzaSyAJeu6fPQuTd7kIBngbH7LxZnCKRQGXCk0", authDomain: "juba-stadium-247f3.firebaseapp.com", projectId: "juba-stadium-247f3", storageBucket: "juba-stadium-247f3.firebasestorage.app", messagingSenderId: "314725857339", appId: "1:314725857339:web:79885c6c7bddb21997841e" };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const log = (m)=> document.getElementById('log').textContent += "\n"+m;
-document.getElementById('btn').onclick = async()=>{
- log("Creating...");
- await setDoc(doc(db,"employees","EMP-101"),{name:"John Gate 1",password:"Juba@2026_101",gate:"GATE 1",role:"ticketing",disabled:false});
- log("EMP-101 created");
- await setDoc(doc(db,"employees","EMP-102"),{name:"Sarah Gate 2",password:"Juba@2026_102",gate:"GATE 2",role:"ticketing",disabled:false});
- log("EMP-102 created");
- await setDoc(doc(db,"employees","ADMIN"),{name:"Stadium Admin",password:"Admin@Juba2026!",gate:"ALL",role:"admin",disabled:false});
- log("ADMIN created");
- await setDoc(doc(db,"stadium_config","prices"),{vip:50000,a:30000,b:20000});
- log("Prices created");
- await setDoc(doc(db,"events","EV-1"),{id:"EV-1",homeTeam:"Jamus",awayTeam:"Elmerehk",date:"2026-10-15",type:"Premier League",totalSeats:2400,homeQuota:40,awayQuota:30,fedQuota:30,createdAt:new Date()});
- log("Event Jamus vs Elmerehk created - DONE!");
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import {getFirestore,doc,setDoc,Timestamp} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+const db=getFirestore(initializeApp({apiKey:"AIzaSyAJeu6fPQuTd7kIBngbH7LxZnCKRQGXCk0",authDomain:"juba-stadium-247f3.firebaseapp.com",projectId:"juba-stadium-247f3"}));
+document.getElementById('btn').onclick=async()=>{
+const b=document.getElementById('btn'); b.textContent="⏳ جاري التحميل..."; b.disabled=true;
+try{
+await setDoc(doc(db,"employees","ADMIN"),{name:"Admin",password:"Admin@Juba2026!",gate:"ALL",role:"admin",disabled:false});
+await setDoc(doc(db,"employees","EMP-101"),{name:"John Gate 1",password:"Juba@2026_101",gate:"GATE 1",role:"ticketing",disabled:false});
+await setDoc(doc(db,"employees","EMP-102"),{name:"Sarah Gate 2",password:"Juba@2026_102",gate:"GATE 2",role:"ticketing",disabled:false});
+await setDoc(doc(db,"stadium_config","prices"),{vip:50000,a:30000,b:20000});
+await setDoc(doc(db,"events","EV-1"),{id:"EV-1",homeTeam:"Jamus",awayTeam:"Elmerehk",date:"2026-10-15",type:"Premier League",totalSeats:2400,homeQuota:40,awayQuota:30,fedQuota:30,createdAt:Timestamp.now()});
+b.textContent="✅ DONE! الداتا نزلت"; b.style.background="#00c950";
+alert("تم بنجاح - ارجع Firebase اعمل Refresh");
+}catch(e){b.textContent="❌ خطأ: "+e.message; b.style.background="red"; b.disabled=false;}
 }
 </script></body></html>
