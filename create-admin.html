@@ -1,7 +1,14 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-const firebaseConfig = { apiKey: "AIzaSyB65erIbKPojeJCtvWCaUPNBqA_YQ6QGJ0", authDomain: "juba-stadium-1ace0.firebaseapp.com", projectId: "juba-stadium-1ace0", storageBucket: "juba-stadium-1ace0.firebasestorage.app", messagingSenderId: "299347484908", appId: "1:299347484908:web:926e359973c26aa1f0c5c9" };
+const firebaseConfig = const firebaseConfig = {
+  apiKey: "AIzaSyAJeu6fPQuTd7kIBngbH7LxZnCKRQGXCk0",
+  authDomain: "juba-stadium-247f3.firebaseapp.com",
+  projectId: "juba-stadium-247f3",
+  storageBucket: "juba-stadium-247f3.firebasestorage.app",
+  messagingSenderId: "314725857339",
+  appId: "1:314725857339:web:79885c6c7bddb21997841e"
+};
 const db = getFirestore(initializeApp(firebaseConfig));
 await setDoc(doc(db,"employees","admin"),{name:"Admin",password:"admin",gate:"GATE 1",role:"admin"});
 await setDoc(doc(db,"employees","EMP-101"),{name:"John Gate1",password:"1234",gate:"GATE 1",role:"ticketing"});
