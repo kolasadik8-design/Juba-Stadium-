@@ -65,7 +65,7 @@
 <script>
 const cfg={apiKey:"AIzaSyAJeu6fPQuTd7kIBngbH7LxZnCKRQGXCk0",authDomain:"juba-stadium-247f3.firebaseapp.com",projectId:"juba-stadium-247f3"};
 firebase.initializeApp(cfg); const db=firebase.firestore();
-const CAP=10000, _dev="Admin@Juba2026!", GATE={vip:{name:'Gate 2 - VIP Lounge Entrance',rule:'VIP ticket valid at Gate 2 ONLY'},second:{name:'Gate 3 - Classic Covered',rule:'Classic ticket valid at Gate 3 ONLY'},third:{name:'Gate 4 & 5 - Standard',rule:'Standard ticket valid at Gate 4 & 5 ONLY'}};
+const CAP=10000, _dev="Aliermakuach@95", GATE={vip:{name:'Gate 2 - VIP Lounge Entrance',rule:'VIP ticket valid at Gate 2 ONLY'},second:{name:'Gate 3 - Classic Covered',rule:'Classic ticket valid at Gate 3 ONLY'},third:{name:'Gate 4 & 5 - Standard',rule:'Standard ticket valid at Gate 4 & 5 ONLY'}};
 let logos={}, sec='vip', curEv=null, lastT=null, html5Qr=null, curUser=null;
 function upLogo(i,t){const f=i.files[0]; if(!f) return; const r=new FileReader(); r.onload=e=>{logos[t]=e.target.result; document.getElementById(t+'Prev').src=e.target.result; document.getElementById(t+'Prev').classList.remove('hidden'); const img=document.getElementById('t'+t.charAt(0).toUpperCase()+t.slice(1)+'Logo'); const fb=document.getElementById('t'+t.charAt(0).toUpperCase()+t.slice(1)+'F'); if(img){img.src=e.target.result; img.classList.remove('hidden'); if(fb) fb.classList.add('hidden');}}; r.readAsDataURL(f);}
 async function login(){const id=uid.value.trim(), p=upass.value.trim(); if(!id||!p){err.innerText='Enter credentials';return;} const d=await db.collection('employees').doc(id).get(); if(!d.exists||d.data().password!==p){err.innerText='Invalid';return;} curUser={id,...d.data()}; loginPage.classList.add('hidden'); mainApp.classList.remove('hidden'); load();}
