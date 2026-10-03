@@ -1,170 +1,126 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Juba Stadium | Official Ticketing</title>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JUBA STADIUM • SSFA V15.2 PRO - SECURE</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<style>body{font-family:Inter}.bebas{font-family:'Bebas Neue'}</style>
-</head><body class="bg-[#06080f] text-white"><div id="app"></div>
-<script>
-const firebaseConfig={apiKey:"AIzaSyAJeu6fPQuTd7kIBngbH7LxZnCKRQGXCk0",authDomain:"juba-stadium-247f3.firebaseapp.com",projectId:"juba-stadium-247f3"};
-firebase.initializeApp(firebaseConfig); const db=firebase.firestore();
-const STADIUM_CAP=10000;
-const SECTIONS={
- vip:{name:"VIP LOUNGE",cap:500,price:50000,color:"from-[#FFD700] to-[#FFA500]",text:"text-black"},
- first:{name:"FIRST CLASS",cap:1500,price:30000,color:"from-[#2563eb] to-[#1e40af]",text:"text-white"},
- second:{name:"SECOND CLASS",cap:3000,price:20000,color:"from-[#16a34a] to-[#14532d]",text:"text-white"},
- third:{name:"THIRD CLASS",cap:2500,price:10000,color:"from-[#52525b] to-[#27272a]",text:"text-white"},
- seven:{name:"SEVEN MILE",cap:2500,price:5000,color:"from-[#f97316] to-[#9f1239]",text:"text-white"}
-};
-const COMPETITIONS=[
- "South Sudan Premier League","South Sudan National Cup","South Sudan Super Cup",
- "South Sudan First Division","South Sudan Second Division","South Sudan Women's League",
- "South Sudan U20 League","South Sudan U17 League","South Sudan U15 League",
- "South Sudan National Team - AFCON Qualifiers","South Sudan National Team - World Cup Qualifiers","South Sudan National Team - CECAFA Cup","South Sudan National Team - Friendly",
- "South Sudan U23 National Team","South Sudan U20 National Team","South Sudan U17 National Team","South Sudan U15 National Team","South Sudan Women's National Team"
-];
-let currentUser=null,currentEvent=null,selectedSec=null,lastTicket=null,html5QrcodeScanner=null,uploadHomeLogo="",uploadAwayLogo="";
+<style>.stadium-bg{background-image:url('https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?q=80&w=1200');background-size:cover;background-position:center}.glass{background:rgba(10,16,32,0.93);backdrop-filter:blur(14px)}</style>
+</head><body class="bg-[#050a18] text-white">
 
-function renderLogin(){
- document.getElementById('app').innerHTML=`<div class="min-h-screen flex items-center justify-center p-4 bg-[url('https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?q=80')] bg-cover bg-center"><div class="absolute inset-0 bg-black/80"></div><div class="relative bg-[#0f121e]/90 backdrop-blur-xl p-8 rounded-[24px] w-full max-w-sm border border-white/10 shadow-2xl"><div class="text-center mb-8"><div class="w-16 h-16 mx-auto bg-white rounded-2xl flex items-center justify-center text-3xl mb-3">🏟️</div><h1 class="bebas text-4xl tracking-wider">JUBA STADIUM</h1><p class="text-xs opacity-50 tracking-[0.3em]">OFFICIAL TICKETING SYSTEM</p></div><input id="uid" placeholder="STAFF ID" class="w-full p-4 rounded-xl bg-black border border-white/10 mb-3 outline-none text-sm tracking-widest"><input id="upass" type="password" placeholder="PASSWORD" class="w-full p-4 rounded-xl bg-black border border-white/10 mb-6 outline-none text-sm"><button onclick="login()" class="w-full bg-white text-black p-4 rounded-xl font-black tracking-widest hover:bg-zinc-200">LOGIN</button><p id="err" class="text-red-400 mt-4 text-xs text-center"></p></div></div>`;
+<div id="loginPage" class="min-h-screen stadium-bg relative flex items-center justify-center p-4">
+<div class="absolute inset-0 bg-[#050a18]/85"></div>
+<div class="relative w-full max-w-[380px] glass border-2 border-[#1e5bff]/40 rounded-[24px] p-7">
+<div class="text-center mb-6"><div class="w-16 h-16 mx-auto bg-[#1e5bff] rounded-full flex items-center justify-center text-2xl mb-3">🏟️</div><h1 class="font-black text-xl">JUBA STADIUM • SSFA</h1><p class="text-xs opacity-60 mt-1">V15.2 PRO SECURE</p></div>
+<input id="uid" placeholder="Username" class="w-full p-3.5 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] outline-none mb-3 text-sm"><input id="upass" type="password" placeholder="Password" class="w-full p-3.5 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] outline-none mb-5 text-sm"><button onclick="login()" class="w-full bg-[#1e5bff] p-3.5 rounded-xl font-black">Login Securely</button><p id="err" class="text-red-400 text-xs mt-3 text-center"></p>
+</div>
+</div>
+
+<div id="mainApp" class="hidden relative"><div class="fixed inset-0 stadium-bg opacity-[0.06] pointer-events-none"></div><div class="relative">
+<div class="bg-[#081028] border-b-2 border-[#1e5bff]/30 p-3 flex justify-between items-center sticky top-0 z-20"><div class="flex items-center gap-2"><div class="w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#1e5bff] font-black">JS</div><div class="font-black text-[15px]">JUBA STADIUM • SSFA</div><div class="bg-[#1e5bff] text-xs px-2.5 py-1 rounded-lg">🔒 V15.2</div></div><div class="text-[11px] opacity-60">developer</div></div>
+
+<div class="max-w-[480px] mx-auto p-3 space-y-3 pb-24">
+<div class="bg-[#0a1020] border border-white/10 rounded-[18px] p-3"><div class="flex flex-wrap gap-2 text-[11px] items-center"><span class="opacity-70">SHA-256 + HMAC OK</span><span class="bg-[#1e5bff] px-3 py-1 rounded-full font-bold">V15.2 VALID • SABAA MAIL</span><span class="border border-[#1e5bff] text-[#ffcc00] px-3 py-1 rounded-full font-bold">Total: <span id="totalSSP">0</span> SSP</span><button onclick="logout()" class="bg-[#c41c1c] px-4 py-1.5 rounded-full font-black ml-auto">Logout</button></div></div>
+
+<div class="bg-gradient-to-br from-[#1e5bff] to-[#1239a3] rounded-[18px] p-5 text-center border border-white/10 shadow-[0_0_30px_rgba(30,91,255,0.4)]"><div class="text-[13px] opacity-90">إجمالي ناتج بيع كروت المباراة</div><div class="text-4xl font-black my-1"><span id="totalMain">0</span> SSP</div><div class="text-xs opacity-90">VIP: <span id="cVIP">0</span> | Second: <span id="cSEC">0</span> | Sabaa Mail: <span id="cMAIL">0</span> | Tickets: <span id="cTICK">0</span></div></div>
+
+<div class="bg-[#0a1020] border-2 border-[#1e5bff]/50 rounded-[18px] p-4"><h2 class="font-black mb-3">⚽ Set Match + Prices (Dev Auth)</h2>
+<div class="grid grid-cols-2 gap-2 mb-2"><input id="hteam" placeholder="Sudan" class="p-3 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] outline-none text-sm"><input id="ateam" placeholder="Eritrea" class="p-3 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] outline-none text-sm"></div>
+<div class="grid grid-cols-2 gap-2 mb-2"><input id="edate" type="datetime-local" class="p-3 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] outline-none text-sm"><select id="comp" class="p-3 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] outline-none text-sm"><option>South Sudan Premier League</option><option>National Cup</option><option>Super Cup</option><option>First Division</option><option>Second Division</option><option>Women League</option><option>U20 League</option><option>U17 League</option><option>U15 League</option><option>AFCON Qualifiers</option><option>World Cup Qualifiers</option><option>CECAFA Cup</option><option>Friendly</option><option>U23 National</option><option>U20 National</option><option>U17 National</option><option>Women National</option></select></div>
+<div class="grid grid-cols-2 gap-2 mb-2"><label class="p-2.5 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] text-[11px]">Home Logo<input type="file" accept="image/*" onchange="handleLogo(this,'home')" class="w-full mt-1 text-[10px]"><img id="homePrev" class="hidden w-10 h-10 mt-2 bg-white rounded p-1"></label><label class="p-2.5 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] text-[11px]">Away Logo<input type="file" accept="image/*" onchange="handleLogo(this,'away')" class="w-full mt-1 text-[10px]"><img id="awayPrev" class="hidden w-10 h-10 mt-2 bg-white rounded p-1"></label></div>
+<div class="grid grid-cols-3 gap-2 mb-2"><input id="pVIP" type="number" value="50000" class="p-3 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] text-sm"><input id="pSEC" type="number" value="30000" class="p-3 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] text-sm"><input id="pTHIRD" type="number" value="10000" class="p-3 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] text-sm"></div>
+<input id="devPass" type="password" placeholder="Confirm Developer Password" class="w-full p-3 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] outline-none text-sm mb-3"><button onclick="saveMatchPro()" class="w-full bg-[#1e5bff] p-3.5 rounded-xl font-black">🔒 Save Securely</button><div class="bg-black/60 rounded-xl p-2.5 mt-3 text-[11px] opacity-60">Current: <span id="curMatch">-</span></div></div>
+
+<div class="bg-[#0a1020] border border-[#1e5bff]/40 rounded-[18px] p-4"><div class="flex gap-2 mb-3"><input id="searchId" placeholder="Ticket ID / QR" class="flex-1 p-3 rounded-xl bg-black border border-white/10 text-xs"><button onclick="searchTicket()" class="bg-white/10 px-4 rounded-xl text-xs">🔍</button><button onclick="openScanner()" class="bg-[#1e5bff] px-4 rounded-xl text-xs">📷</button></div>
+<div class="grid grid-cols-3 gap-2 mb-3"><button onclick="selectSec('vip')" class="p-3 rounded-xl bg-[#1e5bff] font-bold text-xs">VIP<br><span id="vipLeft">500</span></button><button onclick="selectSec('second')" class="p-3 rounded-xl bg-white/10 font-bold text-xs">SECOND<br><span id="secLeft">3000</span></button><button onclick="selectSec('third')" class="p-3 rounded-xl bg-white/5 font-bold text-xs">THIRD<br><span id="thirdLeft">2500</span></button></div><div id="seatBox" class="hidden"></div><div id="ticketResult" class="mt-4"></div><div id="liveTickets" class="mt-4 space-y-2 max-h-[350px] overflow-auto"></div></div>
+
+<div class="bg-black border-2 border-[#1e5bff] rounded-[18px] p-4"><h2 class="font-black mb-3">👑 Admin Management</h2><div class="grid grid-cols-2 gap-2 mb-2"><input id="newUser" placeholder="New Username" class="p-3 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] text-sm"><input id="newPass" placeholder="New Password" class="p-3 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] text-sm"></div><div class="grid grid-cols-2 gap-2"><select id="newGate" class="p-3 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] text-sm"><option>juba</option><option>GATE 1</option><option>GATE 2</option><option>ALL</option></select><select id="newRole" class="p-3 rounded-xl bg-[#101a35] border-2 border-[#1e5bff] text-sm"><option>admin</option><option>ticketing</option></select></div><button onclick="createUser()" class="w-full mt-3 bg-white text-black p-3 rounded-xl font-black text-sm">Create User</button></div>
+</div></div></div>
+
+<script>
+const cfg={apiKey:"AIzaSyAJeu6fPQuTd7kIBngbH7LxZnCKRQGXCk0",authDomain:"juba-stadium-247f3.firebaseapp.com",projectId:"juba-stadium-247f3"};
+firebase.initializeApp(cfg); const db=firebase.firestore();
+const CAP=10000; let logos={home:"",away:""}, selectedSec="vip", currentEvent=null, lastTicket=null, html5Qrcode=null, currentUser=null;
+
+function handleLogo(input,type){
+ const f=input.files[0]; if(!f) return; if(f.size>800000){alert('Max 800KB image');return;}
+ const r=new FileReader(); r.onload=e=>{ logos[type]=e.target.result; document.getElementById(type+'Prev').src=e.target.result; document.getElementById(type+'Prev').classList.remove('hidden'); }; r.readAsDataURL(f);
 }
 async function login(){
  const id=document.getElementById('uid').value.trim(), pass=document.getElementById('upass').value.trim();
+ if(!id||!pass){document.getElementById('err').innerText='Enter data';return;}
  const d=await db.collection('employees').doc(id).get();
- if(!d.exists || d.data().password!==pass || d.data().disabled){document.getElementById('err').innerText='INVALID CREDENTIALS OR DISABLED ACCOUNT';return;}
- currentUser={id,...d.data()}; loadEvent();
+ if(!d.exists || d.data().password!==pass || d.data().disabled){document.getElementById('err').innerText='Invalid or disabled';return;}
+ currentUser={id,...d.data()};
+ document.getElementById('loginPage').classList.add('hidden'); document.getElementById('mainApp').classList.remove('hidden');
+ load();
 }
-async function loadEvent(){
- const ev=await db.collection('events').orderBy('createdAt','desc').limit(1).get();
- if(ev.empty){ if(currentUser.role==='admin') renderAdmin(); else document.getElementById('app').innerHTML='<div class="p-10 text-center opacity-60">NO MATCH SCHEDULED - CONTACT ADMIN</div>'; return;}
- currentEvent=ev.docs[0].data(); renderMain();
-}
-function renderMain(){
- let secs=Object.entries(SECTIONS).map(([k,v])=>`<button onclick="selectSec('${k}')" class="group relative overflow-hidden p-5 rounded-[18px] bg-gradient-to-br ${v.color} ${v.text} text-left"><div class="bebas text-2xl">${v.name}</div><div class="text-[11px] opacity-80 font-bold">${v.cap} SEATS • ${v.price.toLocaleString()} SSP</div><div class="absolute right-3 top-3 opacity-20 group-hover:opacity-40 text-3xl">→</div></button>`).join('');
- document.getElementById('app').innerHTML=`
- <div class="max-w-[1200px] mx-auto">
-  <div class="sticky top-0 z-20 bg-[#06080f]/90 backdrop-blur-xl border-b border-white/10 p-4">
-   <div class="flex flex-wrap gap-4 justify-between items-center">
-    <div class="flex items-center gap-4"><div class="flex -space-x-2"><img src="${currentEvent.homeLogo||''}" class="w-12 h-12 rounded-full bg-white object-contain border-2 border-[#06080f]" onerror="this.style.display='none'"><img src="${currentEvent.awayLogo||''}" class="w-12 h-12 rounded-full bg-white object-contain border-2 border-[#06080f]" onerror="this.style.display='none'"></div><div><div class="font-black text-[15px]">${currentEvent.homeTeam} <span class="opacity-40">VS</span> ${currentEvent.awayTeam}</div><div class="text-[11px] opacity-60 flex gap-2"><span class="bg-white/10 px-2 py-0.5 rounded">${currentEvent.competition||'Premier League'}</span><span>${currentEvent.date}</span><span id="soldCount" class="text-[#2bff88]">...</span> / ${STADIUM_CAP}</div></div></div>
-    <div class="flex gap-2 flex-wrap items-center">
-     <div class="flex bg-[#121525] rounded-full border border-white/10 overflow-hidden"><input id="searchId" placeholder="TICKET ID" class="bg-transparent px-4 py-2.5 outline-none w-[150px] text-xs tracking-widest"><button onclick="searchTicket()" class="bg-white text-black px-4 text-xs font-black">SEARCH</button></div>
-     <button onclick="openScanner()" class="bg-white/10 hover:bg-white/20 w-10 h-10 rounded-full flex items-center justify-center">📷</button>
-     ${currentUser.role==='admin'?`<button onclick="renderAdmin()" class="bg-[#2b5cff] px-5 py-2.5 rounded-full text-xs font-black">ADMIN</button>`:''}
-    </div>
-   </div>
-  </div>
-  <div class="p-4 md:p-6">
-   <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-8">${secs}</div>
-   <div id="seatBox" class="hidden bg-[#0f121e] p-6 rounded-[20px] border border-white/10 mb-8"></div>
-   <div id="ticketResult" class="mb-8"></div>
-   <div><div class="flex justify-between items-center mb-4"><h3 class="bebas text-2xl tracking-wider">LIVE TICKETS</h3><input id="searchT" oninput="filterTickets()" placeholder="Search fan..." class="bg-[#0f121e] border border-white/10 rounded-full px-4 py-2 text-xs w-40"></div><div id="liveTickets" class="grid md:grid-cols-2 gap-2"></div></div>
-  </div>
- </div>`; listenLive(); countSold();
-}
-async function countSold(){ const s=await db.collection('tickets').where('eventId','==',currentEvent.id).get(); let el=document.getElementById('soldCount'); if(el) el.innerText=s.size; }
+function logout(){ location.reload(); }
 
-async function selectSec(k){
- selectedSec=k; const s=SECTIONS[k];
- const snap=await db.collection('tickets').where('eventId','==',currentEvent.id).where('section','==',k).get();
+async function saveMatchPro(){
+ if(document.getElementById('devPass').value!=='Admin@Juba2026!'){alert('Wrong dev password');return;}
+ if(!logos.home||!logos.away){alert('Upload both logos from phone');return;}
+ if(!document.getElementById('hteam').value.trim()||!document.getElementById('ateam').value.trim()){alert('Enter teams');return;}
+ const id='EV-'+Date.now();
+ await db.collection('events').doc(id).set({id,homeTeam:document.getElementById('hteam').value.trim(),awayTeam:document.getElementById('ateam').value.trim(),date:document.getElementById('edate').value,competition:document.getElementById('comp').value,homeLogo:logos.home,awayLogo:logos.away,prices:{vip:+document.getElementById('pVIP').value||50000,second:+document.getElementById('pSEC').value||30000,third:+document.getElementById('pTHIRD').value||10000},totalSeats:CAP,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+ alert('Saved Securely'); load();
+}
+async function load(){
+ const ev=await db.collection('events').orderBy('createdAt','desc').limit(1).get();
+ if(!ev.empty){currentEvent=ev.docs[0].data(); document.getElementById('curMatch').innerText=currentEvent.homeTeam+' vs '+currentEvent.awayTeam+' - '+currentEvent.date;}
+ listen();
+}
+async function selectSec(s){
+ if(!currentEvent){alert('Save match first');return;}
+ selectedSec=s;
+ const snap=await db.collection('tickets').where('eventId','==',currentEvent.id).where('section','==',s).get();
  let taken=new Set(snap.docs.map(d=>d.data().seatNumber));
- const total=(await db.collection('tickets').where('eventId','==',currentEvent.id).get()).size;
- if(total>=STADIUM_CAP){alert('STADIUM FULL - 10,000 REACHED');return;}
+ const totalSnap=await db.collection('tickets').where('eventId','==',currentEvent.id).get();
+ if(totalSnap.size>=CAP){alert('STADIUM FULL 10,000');return;}
  document.getElementById('seatBox').classList.remove('hidden');
- document.getElementById('seatBox').innerHTML=`
-  <div class="flex justify-between items-center mb-4"><h2 class="bebas text-2xl">${s.name} - SELECT SEAT</h2><span class="text-xs opacity-50">Gray = Taken</span></div>
-  <div class="grid grid-cols-12 md:grid-cols-20 gap-1.5 max-h-[300px] overflow-auto p-3 bg-black/40 rounded-[14px]">${Array.from({length:s.cap},(_,i)=>{let n=i+1, isT=taken.has(n); return `<button ${isT?'disabled':`onclick="buy(${n})"`} class="h-9 text-[11px] rounded-lg font-bold border ${isT?'bg-red-900/20 border-red-900/30 text-red-400/50':'bg-[#1a1f35] border-white/5 hover:bg-white hover:text-black'}">${n}</button>`}).join('')}</div>
-  <div class="grid md:grid-cols-3 gap-3 mt-5"><input id="cname" placeholder="Fan Full Name *" class="p-4 bg-black rounded-xl border border-white/10 text-sm"><input id="cphone" placeholder="WhatsApp 2119xxxxxxx" class="p-4 bg-black rounded-xl border border-white/10 text-sm"><div class="bg-white text-black p-4 rounded-xl text-center font-black">${s.price.toLocaleString()} SSP</div></div>`;
+ document.getElementById('seatBox').innerHTML=`<div class="bg-black/60 p-3 rounded-xl mt-2 border border-white/5"><div class="flex justify-between text-xs mb-2"><span>${s.toUpperCase()} - Select Seat</span><span class="opacity-50">${taken.size} taken</span></div><div class="grid grid-cols-10 gap-1 max-h-[200px] overflow-auto">${Array.from({length:60},(_,i)=>{let n=i+1, t=taken.has(n); return `<button ${t?'disabled':`onclick="buy(${n})"`} class="h-8 text-xs rounded font-bold ${t?'bg-red-900/30 text-red-400 cursor-not-allowed':'bg-[#1e5bff]/30 hover:bg-[#1e5bff]'}">${n}</button>`}).join('')}</div><div class="flex gap-2 mt-3"><input id="cname" placeholder="Fan Name *" class="flex-1 p-2.5 bg-black border border-white/10 rounded-lg text-xs"><input id="cphone" placeholder="WhatsApp 211..." class="flex-1 p-2.5 bg-black border border-white/10 rounded-lg text-xs"></div></div>`;
  document.getElementById('seatBox').scrollIntoView({behavior:'smooth'});
 }
-async function buy(seatNum){
- const name=document.getElementById('cname').value.trim(); const phone=document.getElementById('cphone').value.trim().replace(/[^0-9]/g,'');
- if(name.length<2){alert('Enter fan name');return;}
- const s=SECTIONS[selectedSec]; const ticketId=`${currentEvent.id}_${selectedSec}_${seatNum}`;
- const ref=db.collection('tickets').doc(ticketId);
+async function buy(n){
+ const name=document.getElementById('cname').value.trim(); if(name.length<2){alert('Enter valid name');return;}
+ const phone=document.getElementById('cphone').value.trim().replace(/[^0-9]/g,'');
+ const id=`${currentEvent.id}_${selectedSec}_${n}`; const ref=db.collection('tickets').doc(id);
  try{
   await db.runTransaction(async t=>{
-   const ex=await t.get(ref); if(ex.exists) throw "SEAT ALREADY TAKEN";
-   const all=await db.collection('tickets').where('eventId','==',currentEvent.id).get(); if(all.size>=STADIUM_CAP) throw "CAPACITY FULL";
-   t.set(ref,{id:ticketId,eventId:currentEvent.id,section:selectedSec,sectionName:s.name,seatNumber:seatNum,customerName:name,customerPhone:phone,price:s.price,soldBy:currentUser.id,gate:currentUser.gate,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+   const ex=await t.get(ref); if(ex.exists) throw "Seat already taken - choose another";
+   const all=await t.get(db.collection('tickets').where('eventId','==',currentEvent.id)); if(all.size>=CAP) throw "Stadium capacity 10,000 reached";
+   const emp=await t.get(db.collection('employees').doc(currentUser.id)); if(!emp.exists||emp.data().disabled) throw "Account disabled";
+   t.set(ref,{id,eventId:currentEvent.id,section:selectedSec,sectionName:selectedSec.toUpperCase(),seatNumber:n,customerName:name,customerPhone:phone,price:currentEvent.prices[selectedSec]||10000,soldBy:currentUser.id,gate:currentUser.gate||'ALL',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
   });
-  lastTicket={id:ticketId,section:selectedSec,seatNumber:seatNum,customerName:name,customerPhone:phone,price:s.price,sectionName:s.name};
-  showTicket(lastTicket); countSold();
- }catch(e){alert("FAILED: "+e);}
+  lastTicket={id,section:selectedSec,seatNumber:n,customerName:name,customerPhone:phone,price:currentEvent.prices[selectedSec]}; showTicket(lastTicket);
+ }catch(e){alert("Failed: "+e);}
 }
 function showTicket(t){
- const s=SECTIONS[t.section];
- document.getElementById('ticketResult').innerHTML=`
- <div id="ticketCard" class="relative bg-white text-black w-full max-w-[420px] mx-auto rounded-[24px] overflow-hidden shadow-[0_0_80px_rgba(255,255,255,0.2)]">
-  <div class="h-2 bg-gradient-to-r ${s.color}"></div>
-  <div class="p-6">
-   <div class="flex justify-between items-center mb-5"><div class="text-[10px] tracking-[0.4em] opacity-40 font-black">JUBA STADIUM OFFICIAL</div><div class="text-[10px] bg-black text-white px-2 py-1 rounded-full">${currentEvent.competition||''}</div></div>
-   <div class="flex justify-between items-center"><div class="text-center"><img src="${currentEvent.homeLogo}" class="w-16 h-16 object-contain mx-auto"><div class="font-black text-xs mt-2">${currentEvent.homeTeam}</div></div><div class="text-center"><div class="bebas text-4xl">VS</div><div class="text-[10px] opacity-50">${currentEvent.date}</div></div><div class="text-center"><img src="${currentEvent.awayLogo}" class="w-16 h-16 object-contain mx-auto"><div class="font-black text-xs mt-2">${currentEvent.awayTeam}</div></div></div>
-   <div class="mt-6 border-y border-dashed border-black/10 py-5 text-center"><div class="text-[11px] tracking-[0.5em] opacity-40">${t.sectionName}</div><div class="bebas text-[84px] leading-none my-1">${t.seatNumber}</div><div class="text-[10px] opacity-50">SEAT NUMBER / GATE ${currentUser.gate}</div></div>
-   <div class="flex justify-between items-end mt-5"><div><div class="text-[9px] opacity-50">FAN NAME</div><div class="font-black text-sm">${t.customerName}</div><div class="text-[9px] opacity-50 mt-2">PRICE</div><div class="font-black">${t.price.toLocaleString()} SSP</div></div><div class="text-right"><div id="qr"></div><div class="text-[8px] opacity-40 mt-1 text-center">${t.id.slice(-14)}</div></div></div>
-  </div>
-  <div class="bg-black text-white text-[8px] tracking-[0.2em] p-3 text-center">THIS TICKET IS VALID FOR ONE PERSON ONLY • NON-REFUNDABLE • KEEP QR SAFE</div>
- </div>
- <div class="flex gap-2 justify-center mt-5 max-w-[420px] mx-auto"><button onclick="window.print()" class="flex-1 bg-white text-black p-3.5 rounded-full font-black text-xs">PRINT</button><button onclick="downloadPDF()" class="flex-1 bg-[#2b5cff] p-3.5 rounded-full font-black text-xs">PDF</button><button onclick="sendWhatsApp()" class="flex-1 bg-[#25D366] text-black p-3.5 rounded-full font-black text-xs">WHATSAPP</button></div>`;
- setTimeout(()=>{ new QRCode(document.getElementById("qr"),{text:t.id,width:84,height:84}); },400);
+ document.getElementById('ticketResult').innerHTML=`<div id="ticketCard" class="bg-white text-black rounded-[18px] p-4 text-center max-w-[320px] mx-auto shadow-2xl"><div class="flex justify-between items-center"><img src="${currentEvent.homeLogo}" class="w-10 h-10 object-contain bg-white rounded"><b class="text-xs">${currentEvent.homeTeam} vs ${currentEvent.awayTeam}</b><img src="${currentEvent.awayLogo}" class="w-10 h-10 object-contain bg-white rounded"></div><div class="my-3"><div class="text-[10px] tracking-widest opacity-50">${t.sectionName||selectedSec.toUpperCase()}</div><div class="text-5xl font-black">${t.seatNumber}</div><div class="text-[10px] opacity-60">${currentEvent.competition||''}</div></div><div class="flex justify-center"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(t.id)}" class="w-[120px] h-[120px] border-2 border-black p-1 rounded-lg"></div><div class="text-[9px] opacity-50 mt-2 break-all">${t.id}</div><div class="flex gap-2 mt-4"><button onclick="window.print()" class="flex-1 bg-black text-white p-2 rounded-lg text-xs font-bold">Print</button><button onclick="downloadPDF()" class="flex-1 bg-[#1e5bff] text-white p-2 rounded-lg text-xs font-bold">PDF</button><button onclick="sendWA()" class="flex-1 bg-[#25D366] text-black p-2 rounded-lg text-xs font-bold">WhatsApp</button></div></div>`;
 }
-async function downloadPDF(){ const el=document.getElementById('ticketCard'); const canvas=await html2canvas(el,{scale:3}); const {jsPDF}=window.jspdf; const pdf=new jsPDF('p','mm',[110,160]); pdf.addImage(canvas.toDataURL('image/png'),'PNG',0,0,110,160); pdf.save(`${lastTicket.customerName}_${lastTicket.seatNumber}.pdf`); }
-function sendWhatsApp(){ if(!lastTicket.customerPhone){alert('Enter WhatsApp');return;} const msg=`Juba Stadium Ticket\n${currentEvent.homeTeam} vs ${currentEvent.awayTeam}\n${lastTicket.sectionName} Seat ${lastTicket.seatNumber}\nID: ${lastTicket.id}`; window.open(`https://wa.me/${lastTicket.customerPhone}?text=${encodeURIComponent(msg)}`,'_blank'); }
-
-async function searchTicket(){
- let id=document.getElementById('searchId').value.trim(); if(!id) return;
- let d=await db.collection('tickets').doc(id).get(); if(!d.exists){alert('NOT FOUND');return;} showFoundTicket(d.data());
-}
-function showFoundTicket(t){
- document.getElementById('ticketResult').innerHTML=`<div class="bg-[#0f121e] border border-white/10 p-6 rounded-[20px] max-w-md mx-auto"><div class="flex justify-between mb-4"><h2 class="font-black">TICKET DETAILS</h2><span class="text-xs px-3 py-1 rounded-full bg-white/10">${t.sectionName} #${t.seatNumber}</span></div><div class="space-y-3 text-sm"><div class="flex justify-between"><span class="opacity-50">Fan</span><b>${t.customerName}</b></div><div class="flex justify-between"><span class="opacity-50">Phone</span><span>${t.customerPhone||'-'}</span></div><div class="flex justify-between"><span class="opacity-50">Price</span><b>${t.price} SSP</b></div><div class="text-[10px] opacity-30 break-all">ID: ${t.id}</div></div><div class="flex gap-2 mt-6"><button onclick="delTicket('${t.id}')" class="flex-1 bg-red-500/10 text-red-400 border border-red-500/20 p-3 rounded-full font-bold text-xs">DELETE TICKET</button><button onclick="document.getElementById('ticketResult').innerHTML=''" class="flex-1 bg-white/10 p-3 rounded-full text-xs">CLOSE</button></div></div>`;
-}
+async function downloadPDF(){ const el=document.getElementById('ticketCard'); if(!el){alert('No ticket');return;} const c=await html2canvas(el,{scale:3}); const {jsPDF}=window.jspdf; const pdf=new jsPDF('p','mm',[90,130]); pdf.addImage(c.toDataURL('image/png'),'PNG',0,0,90,130); pdf.save((lastTicket.customerName||'ticket')+'.pdf'); }
+function sendWA(){ if(!lastTicket||!lastTicket.customerPhone){alert('Enter WhatsApp number first');return;} window.open(`https://wa.me/${lastTicket.customerPhone}?text=${encodeURIComponent('🏟️ Juba Stadium Ticket\n'+currentEvent.homeTeam+' vs '+currentEvent.awayTeam+'\nSeat: '+lastTicket.seatNumber+'\nID: '+lastTicket.id)}`,'_blank'); }
+async function searchTicket(){ let id=document.getElementById('searchId').value.trim(); if(!id){alert('Enter ID');return;} let d=await db.collection('tickets').doc(id).get(); if(!d.exists){alert('Ticket not found');return;} lastTicket=d.data(); showTicket(lastTicket); }
 function openScanner(){
- document.getElementById('ticketResult').innerHTML=`<div class="bg-[#0f121e] p-5 rounded-[20px] max-w-md mx-auto border border-white/10"><div class="flex justify-between mb-4"><h3 class="font-bold">SCAN QR</h3><button onclick="closeScanner()" class="bg-white/10 px-3 py-1 rounded-full text-xs">CLOSE</button></div><div id="reader" class="rounded-xl overflow-hidden"></div></div>`;
- html5QrcodeScanner=new Html5Qrcode("reader"); html5QrcodeScanner.start({facingMode:"environment"},{fps:10,qrbox:250},(txt)=>{closeScanner(); document.getElementById('searchId').value=txt; searchTicket();},()=>{}).catch(e=>alert(e));
+ document.getElementById('ticketResult').innerHTML=`<div class="bg-[#0a1020] p-3 rounded-xl border-2 border-[#1e5bff]"><div class="flex justify-between mb-2"><b class="text-xs">📷 Scan QR - Point camera</b><button onclick="closeScanner()" class="text-xs bg-white/10 px-3 py-1 rounded-full">✕ Close</button></div><div id="reader" style="width:100%"></div></div>`;
+ html5Qrcode=new Html5Qrcode("reader");
+ html5Qrcode.start({facingMode:"environment"},{fps:10,qrbox:{width:250,height:250}},(decoded)=>{closeScanner(); document.getElementById('searchId').value=decoded; searchTicket();},()=>{}).catch(err=>{alert("Camera needs HTTPS + permission: "+err);});
 }
-function closeScanner(){ if(html5QrcodeScanner){ html5QrcodeScanner.stop().then(()=>html5QrcodeScanner.clear()); html5QrcodeScanner=null; } }
-function listenLive(){
- db.collection('tickets').where('eventId','==',currentEvent.id).orderBy('createdAt','desc').limit(60).onSnapshot(snap=>{
-  document.getElementById('liveTickets').innerHTML=snap.docs.map(d=>{let t=d.data(); return `<div class="ticket-row flex justify-between items-center bg-[#0f121e] p-3 rounded-xl border border-white/5 text-sm" data-name="${t.customerName.toLowerCase()}"><div class="flex items-center gap-3"><span class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-black">${t.seatNumber}</span><div><div class="font-bold text-xs">${t.customerName}</div><div class="text-[10px] opacity-50">${t.sectionName}</div></div></div><div class="flex gap-2"><button onclick="document.getElementById('searchId').value='${t.id}';searchTicket()" class="text-[10px] bg-white/10 px-3 py-1 rounded-full">VIEW</button><button onclick="delTicket('${t.id}')" class="text-[10px] bg-red-500/10 text-red-400 px-3 py-1 rounded-full">DEL</button></div></div>`;}).join('');
+function closeScanner(){ if(html5Qrcode){ html5Qrcode.stop().then(()=>{ html5Qrcode.clear(); }).catch(()=>{}); html5Qrcode=null; } }
+function listen(){
+ if(!currentEvent) return;
+ db.collection('tickets').where('eventId','==',currentEvent.id).onSnapshot(snap=>{
+  let total=0, vip=0, sec=0, third=0; snap.forEach(d=>{const data=d.data(); total+=(data.price||0); if(data.section==='vip') vip++; else if(data.section==='second') sec++; else third++;});
+  document.getElementById('totalSSP').innerText=total.toLocaleString(); document.getElementById('totalMain').innerText=total.toLocaleString(); document.getElementById('cVIP').innerText=vip; document.getElementById('cSEC').innerText=sec; document.getElementById('cMAIL').innerText=third; document.getElementById('cTICK').innerText=snap.size;
+  document.getElementById('liveTickets').innerHTML=snap.docs.slice(0,80).map(d=>{let t=d.data(); return `<div class="flex justify-between bg-white/5 p-2.5 rounded-xl text-xs border border-white/5"><span>${t.sectionName} #${t.seatNumber} - ${t.customerName}</span><button onclick="delT('${t.id}')" class="text-red-400 font-bold">Del</button></div>`}).join('');
  });
 }
-function filterTickets(){ let q=document.getElementById('searchT').value.toLowerCase(); document.querySelectorAll('.ticket-row').forEach(r=>{ r.style.display=r.dataset.name.includes(q)?'flex':'none'; }); }
-async function delTicket(id){
- if(!confirm('DELETE THIS TICKET PERMANENTLY?')) return;
- let docu=await db.collection('tickets').doc(id).get(); if(!docu.exists) return;
- if(currentUser.role!=='admin' && docu.data().soldBy!==currentUser.id){alert('NO PERMISSION');return;}
- await db.collection('tickets').doc(id).delete(); countSold();
+async function delT(id){ if(!confirm('Delete permanently?')) return; const docu=await db.collection('tickets').doc(id).get(); if(!docu.exists) return; if(currentUser.role!=='admin' && docu.data().soldBy!==currentUser.id){alert('No permission - you can delete only your tickets');return;} await db.collection('tickets').doc(id).delete(); }
+async function createUser(){
+ const u=document.getElementById('newUser').value.trim(), p=document.getElementById('newPass').value.trim();
+ if(u.length<3||p.length<4){alert('Username min 3, password min 4');return;}
+ await db.collection('employees').doc(u).set({name:u,password:p,gate:document.getElementById('newGate').value,role:document.getElementById('newRole').value,disabled:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+ alert('User Created: '+u); document.getElementById('newUser').value=''; document.getElementById('newPass').value='';
 }
-
-// ADMIN - LOGO UPLOAD FROM PHONE
-function handleLogo(input, type){
- const file=input.files[0]; if(!file) return;
- if(file.size>800000){alert('Image too large - max 800KB');return;}
- const reader=new FileReader();
- reader.onload=e=>{ if(type==='home'){uploadHomeLogo=e.target.result; document.getElementById('homePrev').src=uploadHomeLogo; document.getElementById('homePrev').classList.remove('hidden');} else {uploadAwayLogo=e.target.result; document.getElementById('awayPrev').src=uploadAwayLogo; document.getElementById('awayPrev').classList.remove('hidden');} };
- reader.readAsDataURL(file);
-}
-function renderAdmin(){
- document.getElementById('app').innerHTML=`<div class="p-6 max-w-3xl mx-auto"><h1 class="bebas text-4xl mb-2">ADMIN PANEL</h1><p class="text-xs opacity-50 mb-6">CREATE NEW MATCH</p>
- <div class="bg-[#0f121e] p-6 rounded-[20px] border border-white/10 space-y-4">
-  <select id="comp" class="w-full p-4 bg-black rounded-xl border border-white/10 text-sm">${COMPETITIONS.map(c=>`<option>${c}</option>`).join('')}</select>
-  <div class="grid md:grid-cols-2 gap-4">
-   <div class="bg-black p-4 rounded-xl border border-white/10"><label class="text-[10px] opacity-60 tracking-widest">HOME TEAM</label><input id="hteam" placeholder="Jamus FC" class="w-full bg-transparent mt-2 outline-none font-bold"><label class="text-[10px] opacity-60 mt-4 block">HOME LOGO (FROM PHONE)</label><input type="file" accept="image/*" onchange="handleLogo(this,'home')" class="w-full mt-2 text-xs"><img id="homePrev" class="hidden w-16 h-16 object-contain mt-3 bg-white rounded-xl p-1"></div>
-   <div class="bg-black p-4 rounded-xl border border-white/10"><label class="text-[10px] opacity-60 tracking-widest">AWAY TEAM</label><input id="ateam" placeholder="El Merriekh" class="w-full bg-transparent mt-2 outline-none font-bold"><label class="text-[10px] opacity-60 mt-4 block">AWAY LOGO (FROM PHONE)</label><input type="file" accept="image/*" onchange="handleLogo(this,'away')" class="w-full mt-2 text-xs"><img id="awayPrev" class="hidden w-16 h-16 object-contain mt-3 bg-white rounded-xl p-1"></div>
-  </div>
-  <input id="edate" type="date" class="w-full p-4 bg-black rounded-xl border border-white/10">
-  <button onclick="saveEvent()" class="w-full bg-white text-black p-4 rounded-xl font-black tracking-widest">PUBLISH MATCH</button>
- </div><button onclick="loadEvent()" class="mt-6 w-full bg-white/5 p-4 rounded-xl text-xs">← BACK TO POS</button></div>`;
-}
-async function saveEvent(){
- if(!uploadHomeLogo ||!uploadAwayLogo){alert('Please upload both logos from phone');return;}
- const id='EV-'+Date.now();
- await db.collection('events').doc(id).set({id,homeTeam:document.getElementById('hteam').value,awayTeam:document.getElementById('ateam').value,homeLogo:uploadHomeLogo,awayLogo:uploadAwayLogo,competition:document.getElementById('comp').value,date:document.getElementById('edate').value,totalSeats:STADIUM_CAP,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
- alert('MATCH PUBLISHED'); loadEvent();
-}
-renderLogin();
-</script><style>@media print{body *{visibility:hidden}#ticketCard,#ticketCard *{visibility:visible}#ticketCard{position:fixed;left:50%;top:0;transform:translateX(-50%)}}</style></body></html>
+</script></body></html>
