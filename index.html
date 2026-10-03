@@ -1,136 +1,91 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Juba Stadium Pro • V15.2 SERIAL PRO</title>
+<title>Juba Stadium Pro • V15.4 SECURE SSP</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<style>
-.stadium-hero{background-image:url('https://images.unsplash.com/photo-1577224685037-d7d34c1d6c67?q=80&w=2000');background-size:cover;background-position:center}
-.stadium-login{background-image:url('https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?q=80&w=2000');background-size:cover;background-position:center}
-.glass{background:rgba(13,18,35,0.92);backdrop-filter:blur(18px);border:1px solid rgba(30,91,255,0.25)}
-</style>
+<style>.glass{background:rgba(13,18,35,0.96);backdrop-filter:blur(20px);border:1px solid rgba(212,175,55,0.25)}.ticket-gold{border:2px solid #d4af37; background:linear-gradient(135deg,#0a0f1f 0%,#1a1f35 100%)}</style>
 </head><body class="bg-[#070a14] text-white">
-
-<!-- LOGIN WITH STADIUM LIKE IMAGE -->
-<div id="loginPage" class="min-h-screen stadium-login relative flex items-center justify-center p-4">
-<div class="absolute inset-0 bg-[#070a14]/80"></div>
-<div class="relative w-full max-w-[400px] glass rounded-[24px] p-8">
-<div class="text-center mb-6"><div class="w-14 h-14 mx-auto bg-[#1e5bff] rounded-xl flex items-center justify-center text-2xl mb-3">🛡️</div><h1 class="font-black text-xl">Juba Stadium Pro</h1><p class="text-[11px] opacity-60 mt-1">V15.2 • SERIAL • SABAA MAIL</p></div>
-<input id="uid" placeholder="Username" class="w-full p-3.5 rounded-xl bg-black/40 border border-white/10 outline-none mb-3 text-sm focus:border-[#1e5bff]"><input id="upass" type="password" placeholder="Password" class="w-full p-3.5 rounded-xl bg-black/40 border border-white/10 outline-none mb-6 text-sm"><button onclick="login()" class="w-full bg-[#1e5bff] p-3.5 rounded-xl font-black">Sign In Securely</button><p id="err" class="text-red-400 text-xs mt-3 text-center"></p>
-</div>
-</div>
+<div id="loginPage" class="min-h-screen flex items-center justify-center p-4"><div class="w-full max-w-[400px] glass rounded-[24px] p-8"><div class="text-center mb-6"><div class="w-14 h-14 mx-auto bg-[#d4af37] rounded-xl flex items-center justify-center text-black text-2xl font-black">J</div><h1 class="font-black text-xl mt-3">Juba Stadium Pro</h1><p class="text-[11px] opacity-60">V15.4 SECURE • SSP • SABAA MAIL</p></div><input id="uid" placeholder="Username" class="w-full p-3.5 rounded-xl bg-black/50 border border-white/10 outline-none mb-3 text-sm"><input id="upass" type="password" placeholder="Password" class="w-full p-3.5 rounded-xl bg-black/50 border border-white/10 outline-none mb-6 text-sm"><button onclick="login()" class="w-full bg-[#d4af37] text-black p-3.5 rounded-xl font-black">Sign In Securely</button><p id="err" class="text-red-400 text-xs mt-3 text-center"></p></div></div>
 
 <div id="mainApp" class="hidden">
-<!-- HEADER LIKE IMAGE -->
-<div class="bg-[#0d1223] border-b border-[#1e5bff]/20 p-4 sticky top-0 z-30"><div class="max-w-[1250px] mx-auto flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-[#1e5bff] rounded-xl flex items-center justify-center">🛡️</div><div class="font-black text-xl">Juba Stadium Pro</div></div><div class="hidden md:flex gap-6 text-[13px] opacity-70"><span class="text-[#1e5bff]">Home</span><span>Matches</span><span>Tickets</span><span>My Tickets</span><span>Help</span></div><div class="flex items-center gap-3"><div class="w-8 h-8 bg-[#1e5bff] rounded-full flex items-center justify-center text-xs font-black">JD</div><button onclick="logout()" class="border border-[#1e5bff] px-4 py-1.5 rounded-lg text-xs">Logout</button></div></div></div>
+<div class="bg-[#0d1223] border-b border-[#d4af37]/20 p-4 sticky top-0 z-30"><div class="max-w-[1250px] mx-auto flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-[#d4af37] rounded-xl flex items-center justify-center text-black font-black">J</div><div class="font-black">Juba Stadium Pro • SSP</div></div><button onclick="logout()" class="border border-[#d4af37]/30 px-4 py-1.5 rounded-lg text-xs">Logout</button></div></div>
 
-<!-- BACKGROUND IMAGE LIKE YOUR SCREENSHOT -->
-<div class="max-w-[1250px] mx-auto p-4 lg:p-6 grid lg:grid-cols-[1.55fr_0.75fr] gap-6">
-
-<!-- LEFT - MATCH CARD WITH STADIUM BG LIKE IMAGE -->
+<div class="max-w-[1250px] mx-auto p-4 lg:p-6 grid lg:grid-cols-[1.6fr_0.8fr] gap-6">
 <div class="space-y-4">
-<!-- UPCOMING MATCH CARD - EXACT LIKE IMAGE -->
-<div class="rounded-[18px] overflow-hidden border border-[#1e5bff]/30 relative">
-<div class="absolute inset-0 stadium-hero"></div><div class="absolute inset-0 bg-gradient-to-t from-[#0d1223] via-[#0d1223]/60 to-[#0d1223]/20"></div>
-<div class="relative p-6">
-<div class="inline-flex bg-[#1e3a5f]/80 px-3 py-1 rounded-lg text-[11px] font-bold mb-3">• UPCOMING MATCH</div>
-<div class="flex justify-between items-start"><div><h2 id="matchTitle" class="text-3xl font-black">Jamus FC vs El Merriekh</h2><div class="flex gap-6 mt-4 text-xs"><div class="flex gap-2"><span>📅</span><span id="matchDate">Sun, 12 Oct 2025 • 19:30 EAT</span></div><div class="flex gap-2"><span>📍</span><span>Juba Stadium Pro,<br>Juba, South Sudan</span></div></div></div><div class="bg-[#1e5bff] rounded-xl px-4 py-2 text-xs font-bold hidden md:block">Premier League<br>Matchday 14</div></div>
-
-<!-- EXISTING TOTAL BOX - KEEP ALL FUNCTIONALITY -->
-<div class="mt-6 glass rounded-xl p-4 flex justify-between items-center"><div><div class="text-[11px] opacity-60">إجمالي ناتج بيع كروت المباراة</div><div class="text-2xl font-black"><span id="totalMain">0</span> SSP • Total: <span id="totalSSP">0</span> SSP</div><div class="text-[11px] opacity-60 mt-1">VIP: <span id="cVIP">0</span> | Second: <span id="cSEC">0</span> | Tickets: <span id="cTICK">0</span></div></div><div class="bg-[#1e5bff] w-10 h-10 rounded-xl flex items-center justify-center">🏟️</div></div>
-
-<!-- SELECT SEAT CATEGORY - LIKE IMAGE BUT KEEP SERIAL LOGIC -->
-<h3 class="font-bold mt-6 mb-3">Select Seat Category</h3>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-<button onclick="selectSec('vip')" class="text-left p-4 rounded-xl bg-[#1e5bff] border border-[#1e5bff] hover:scale-[1.02] transition"><div class="font-black">👑 VIP $120</div><div class="text-[11px] opacity-90 mt-1">Premium seats • Pitchside view • Lounge access</div><div class="text-[11px] mt-2 opacity-70"><span id="vipCount">0</span> seats / 500 • SERIAL MODE</div></button>
-<button onclick="selectSec('second')" class="text-left p-4 rounded-xl bg-[#0d1223]/80 border border-white/10"><div class="font-black">🎒 CLASSIC $50</div><div class="text-[11px] opacity-60 mt-1">Covered stand • Great view</div><div class="text-[11px] mt-2 opacity-50"><span id="secCount">0</span> / 3000</div></button>
-<button onclick="selectSec('third')" class="text-left p-4 rounded-xl bg-[#0d1223]/60 border border-white/10"><div class="font-black">🏟️ STANDARD $25</div><div class="text-[11px] opacity-60 mt-1">General admission • Open stands</div><div class="text-[11px] mt-2 opacity-50"><span id="thirdCount">0</span> / 2500</div></button>
+<div class="glass rounded-[18px] p-6"><h3 class="font-black text-sm">⚽ Set Match - Upload 3 Logos From Phone - SSP</h3>
+<div class="grid grid-cols-2 gap-2 mt-4"><input id="hteam" placeholder="Home: Jamus FC" class="p-3 rounded-xl bg-black/50 border border-white/10 text-sm"><input id="ateam" placeholder="Away: Al Merriekh" class="p-3 rounded-xl bg-black/50 border border-white/10 text-sm"></div>
+<div class="grid grid-cols-3 gap-2 mt-3">
+<label class="p-3 rounded-xl bg-[#d4af37]/10 border border-[#d4af37]/30 text-[11px] text-center cursor-pointer">🏆 البطولة (النص)<input type="file" accept="image/*" onchange="upLogo(this,'tour')" class="hidden"><img id="tourPrev" class="hidden w-14 h-14 mx-auto mt-2 bg-white rounded-lg p-1 object-contain"></label>
+<label class="p-3 rounded-xl bg-black/40 border border-white/10 text-[11px] text-center cursor-pointer">🛡️ المضيف (يسار)<input type="file" accept="image/*" onchange="upLogo(this,'home')" class="hidden"><img id="homePrev" class="hidden w-14 h-14 mx-auto mt-2 bg-white rounded-lg p-1 object-contain"></label>
+<label class="p-3 rounded-xl bg-black/40 border border-white/10 text-[11px] text-center cursor-pointer">⭐ الضيف (يمين)<input type="file" accept="image/*" onchange="upLogo(this,'away')" class="hidden"><img id="awayPrev" class="hidden w-14 h-14 mx-auto mt-2 bg-white rounded-lg p-1 object-contain"></label>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-3"><input id="edate" type="datetime-local" class="p-3 rounded-xl bg-black/50 border border-white/10 text-sm"><select id="stadium" class="p-3 rounded-xl bg-black/50 border border-white/10 text-sm"><option>Juba Stadium</option><option>Buluk Stadium</option></select></div>
+<select id="comp" class="w-full mt-2 p-3 rounded-xl bg-black/50 border border-white/10 text-sm">
+<option>South Sudan Premier League</option><option>South Sudan National Cup</option><option>South Sudan Super Cup</option>
+<option>CAF Champions League - دوري أبطال أفريقيا</option><option>CAF Confederation Cup - الكونفدرالية الأفريقية</option>
+<option>CECAFA Club Cup</option><option>AFCON Qualifiers</option><option>World Cup Qualifiers</option>
+</select>
+<div class="grid grid-cols-3 gap-2 mt-3">
+<div><label class="text-[10px] opacity-60">VIP SSP</label><input id="pVIP" type="number" value="15000" class="w-full p-3 rounded-xl bg-black/50 border border-white/10 text-sm"></div>
+<div><label class="text-[10px] opacity-60">SECOND SSP</label><input id="pSEC" type="number" value="7000" class="w-full p-3 rounded-xl bg-black/50 border border-white/10 text-sm"></div>
+<div><label class="text-[10px] opacity-60">THIRD SSP</label><input id="pTHIRD" type="number" value="3000" class="w-full p-3 rounded-xl bg-black/50 border border-white/10 text-sm"></div>
+</div>
+<button onclick="saveMatchSecure()" class="w-full mt-4 bg-[#d4af37] text-black p-3.5 rounded-xl font-black">🔒 Save Securely (SSP)</button>
+<div class="mt-3 text-[11px] opacity-50">Current: <span id="curMatch">-</span> | Total: <span id="totalMain">0</span> SSP • VIP:<span id="cVIP">0</span> SEC:<span id="cSEC">0</span> THIRD:<span id="cTHIRD">0</span></div>
 </div>
 
-<div id="seatBox" class="hidden mt-4"></div>
+<div class="glass rounded-[16px] p-5"><h4 class="font-bold text-sm">Select Category - SERIAL SSP</h4><div class="grid grid-cols-3 gap-2 mt-3">
+<button onclick="selectSec('vip')" class="p-3 rounded-xl bg-[#d4af37] text-black text-xs font-black">VIP • <span id="vipPrice">15000</span> SSP<br><span id="vipCount">0</span>/500</button>
+<button onclick="selectSec('second')" class="p-3 rounded-xl bg-white/10 text-xs font-bold">SECOND • <span id="secPrice">7000</span> SSP<br><span id="secCount">0</span>/3000</button>
+<button onclick="selectSec('third')" class="p-3 rounded-xl bg-white/5 text-xs font-bold">THIRD • <span id="thirdPrice">3000</span> SSP<br><span id="thirdCount">0</span>/2500</button>
+</div><div id="seatBox" class="hidden mt-4"></div></div>
 
-<!-- SET MATCH + PRICES - KEEP ALL OLD CODE -->
-<div class="glass rounded-[16px] p-5 mt-6"><h3 class="font-black text-sm mb-3">⚽ Set Match + Prices (Dev Auth) - V15.2 SABAA MAIL</h3>
-<div class="grid grid-cols-2 gap-2 mb-2"><input id="hteam" placeholder="Jamus FC" class="p-3 rounded-xl bg-black/40 border border-white/10 text-sm"><input id="ateam" placeholder="El Merriekh" class="p-3 rounded-xl bg-black/40 border border-white/10 text-sm"></div>
-<div class="grid grid-cols-2 gap-2 mb-2"><input id="edate" type="datetime-local" class="p-3 rounded-xl bg-black/40 border border-white/10 text-sm"><select id="comp" class="p-3 rounded-xl bg-black/40 border border-white/10 text-sm"><option>Premier League</option><option>National Cup</option><option>Super Cup</option><option>First Division</option><option>Second Division</option><option>AFCON Qualifiers</option><option>World Cup Qualifiers</option><option>CECAFA</option><option>U23</option><option>U20</option><option>U17</option></select></div>
-<div class="grid grid-cols-2 gap-2 mb-2"><label class="p-2.5 rounded-xl bg-black/40 border border-white/10 text-[11px] cursor-pointer">Home Logo<input type="file" accept="image/*" onchange="handleLogo(this,'home')" class="hidden"><img id="homePrev" class="hidden w-10 h-10 mt-2 bg-white rounded p-1"></label><label class="p-2.5 rounded-xl bg-black/40 border border-white/10 text-[11px] cursor-pointer">Away Logo<input type="file" accept="image/*" onchange="handleLogo(this,'away')" class="hidden"><img id="awayPrev" class="hidden w-10 h-10 mt-2 bg-white rounded p-1"></label></div>
-<div class="grid grid-cols-3 gap-2 mb-2"><input id="pVIP" type="number" value="120" class="p-3 rounded-xl bg-black/40 border border-white/10 text-sm"><input id="pSEC" type="number" value="50" class="p-3 rounded-xl bg-black/40 border border-white/10 text-sm"><input id="pTHIRD" type="number" value="25" class="p-3 rounded-xl bg-black/40 border border-white/10 text-sm"></div>
-<input id="devPass" type="password" placeholder="Confirm Developer Password" class="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-sm mb-3"><button onclick="saveMatchPro()" class="w-full bg-[#1e5bff] p-3.5 rounded-xl font-black">🔒 Save Securely</button><div class="bg-black/40 rounded-xl p-2.5 mt-3 text-[11px] opacity-60">Current: <span id="curMatch">-</span></div></div>
-
-<!-- Seating Map + Admin - KEEP -->
-<div class="glass rounded-[16px] p-5 mt-4 grid md:grid-cols-2 gap-6"><div><h4 class="font-bold">Seating Map</h4><div class="mt-3 opacity-50 text-xs">VIP • Classic • Standard - SERIAL cutting active</div><div class="mt-3 flex gap-2 text-[11px]"><span class="flex items-center gap-1"><span class="w-3 h-3 bg-[#1e5bff] rounded-full"></span>VIP</span><span class="flex items-center gap-1"><span class="w-3 h-3 bg-white/20 rounded-full"></span>Classic</span><span class="flex items-center gap-1"><span class="w-3 h-3 bg-white/5 rounded-full"></span>Standard</span></div></div>
-<div><h4 class="font-bold">👑 Admin Management</h4><div class="grid grid-cols-2 gap-2 mt-3"><input id="newUser" placeholder="New Username" class="p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs"><input id="newPass" placeholder="New Password" class="p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs"></div><div class="grid grid-cols-2 gap-2 mt-2"><select id="newGate" class="p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs"><option>juba</option><option>GATE 3 - VIP Entrance</option><option>GATE 1</option><option>ALL</option></select><select id="newRole" class="p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs"><option>admin</option><option>ticketing</option></select></div><button onclick="createUser()" class="w-full mt-3 bg-white text-black p-2.5 rounded-xl font-black text-xs">Create User</button></div></div>
-</div>
+<div class="glass rounded-[16px] p-4 flex gap-2"><input id="searchId" placeholder="Search Ticket / QR" class="flex-1 p-2.5 rounded-xl bg-black/50 border border-white/10 text-xs"><button onclick="searchTicket()" class="bg-white/10 px-3 rounded-xl text-xs">🔍</button><button onclick="openScanner()" class="bg-[#d4af37] text-black px-3 rounded-xl text-xs font-bold">📷 SCAN</button></div>
+<div id="liveTickets" class="glass rounded-[16px] p-4 max-h-[300px] overflow-auto text-[11px] space-y-2"></div>
 </div>
 
-<!-- RIGHT - YOUR TICKET LIKE IMAGE -->
 <div class="glass rounded-[18px] p-5 h-fit sticky top-[80px]">
-<div class="flex items-center gap-2 font-bold mb-4">🎫 Your Ticket</div>
-<div class="border border-dashed border-white/20 rounded-xl p-4">
-<div class="text-center text-[#1e5bff] text-[11px] font-bold tracking-widest">E-TICKET</div><div id="ticketMatch" class="font-bold text-center mt-1">Jamus FC vs El Merriekh</div>
-<div class="grid grid-cols-2 gap-4 mt-4 text-[11px]"><div><div class="opacity-50">DATE & TIME</div><div id="ticketDate" class="font-bold">12 Oct 2025, 19:30 EAT</div></div><div><div class="opacity-50">GATE</div><div class="font-bold">Gate 3 - VIP Entrance</div></div></div>
-<div class="mt-4 text-[11px]"><div class="opacity-50">SEAT</div><div id="ticketSeat" class="font-bold">VIP - Section V12 • Row 05 • Seat 18 - SERIAL</div></div>
-<div class="flex justify-center mt-4"><div id="ticketQR"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=JSP-2025-001842" class="w-[110px] h-[110px] bg-white p-1 rounded-lg"></div></div>
-<div id="ticketId" class="text-center text-[10px] opacity-50 mt-2">Ticket #: JSP-2025-001842</div>
-<div id="ticketResult" class="mt-2"></div>
+<h4 class="font-bold flex items-center gap-2">🎫 Your Ticket - SSP PRO</h4>
+<div id="ticketCard" class="mt-4 ticket-gold rounded-[14px] p-5 hidden">
+<div class="flex justify-between items-center"><img id="tHomeLogo" src="" class="w-14 h-14 bg-white rounded-full p-1 object-contain"><div class="text-center"><img id="tTourLogo" src="" class="w-16 h-16 bg-white rounded-xl p-1 object-contain mx-auto"><div id="tComp" class="text-[9px] text-[#d4af37] font-bold mt-1 tracking-widest">SSFA</div></div><img id="tAwayLogo" src="" class="w-14 h-14 bg-white rounded-lg p-1 object-contain"></div>
+<div id="tMatch" class="text-center font-black text-[16px] mt-4">Jamus FC vs Al Merriekh</div>
+<div class="grid grid-cols-2 gap-3 mt-4 text-[11px] border-t border-[#d4af37]/20 pt-3"><div><div class="opacity-50">VENUE</div><div id="tVenue" class="font-bold">Juba Stadium</div></div><div><div class="opacity-50">DATE • TIME</div><div id="tDate" class="font-bold">12 OCT 2025 • 19:30</div></div><div><div class="opacity-50">TYPE • GATE</div><div id="tTypeGate" class="font-bold text-[#d4af37]">VIP • GATE 3</div></div><div><div class="opacity-50">SEAT • SERIAL</div><div id="tSeat" class="font-bold">#12 • SERIAL</div></div></div>
+<div class="flex justify-center mt-4"><div id="tQR" class="bg-white p-2 rounded-xl"></div></div>
+<div id="tPrice" class="text-center mt-3 bg-[#d4af37] text-black py-2 rounded font-black text-xs">PRICE: 15000 SSP • SERIAL: SSFA-001</div>
 </div>
 
-<div class="mt-6"><h4 class="font-bold text-sm">Order Summary</h4>
-<div class="flex justify-between text-sm mt-3"><span>VIP Ticket x1</span><span id="orderPrice">$120.00</span></div><div class="flex justify-between text-xs opacity-60 mt-1"><span>Service Fee</span><span>$5.00</span></div><div class="flex justify-between font-black mt-3"><span>Total</span><span id="orderTotal" class="text-[#1e5bff]">$125.00</span></div>
-<button class="w-full mt-4 bg-[#1e5bff] p-3.5 rounded-xl font-black text-sm">Purchase Ticket — $125.00</button><div class="text-center text-[11px] opacity-50 mt-2">🔒 Secure payment • Instant e-ticket delivery</div></div>
+<div id="ticketActions" class="hidden mt-4 grid grid-cols-1 gap-2">
+<button onclick="downloadPDFPro()" class="w-full bg-white text-black p-3 rounded-xl font-black text-xs">📄 Download PDF - Print</button>
+<button onclick="printTicket()" class="w-full bg-[#d4af37] text-black p-3 rounded-xl font-black text-xs">🖨️ Print Now (Phone/PC Printer)</button>
+<button onclick="sendWhatsApp()" class="w-full bg-[#25D366] text-black p-3 rounded-xl font-black text-xs">💬 Send via WhatsApp - PDF + QR</button>
+<div class="text-[10px] opacity-50 text-center mt-2">QR قابل للقراءة للمشجع عند البوابة</div>
+</div>
 
-<div class="mt-6"><div class="flex gap-2 mb-3"><input id="searchId" placeholder="Search Ticket ID / QR" class="flex-1 p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs"><button onclick="searchTicket()" class="bg-white/10 px-3 rounded-xl text-xs">🔍</button><button onclick="openScanner()" class="bg-[#1e5bff] px-3 rounded-xl text-xs">📷</button></div><div id="liveTickets" class="space-y-2 max-h-[250px] overflow-auto text-xs"></div></div>
+<div id="reader" class="mt-4 hidden"></div>
 </div>
 </div>
-
-<div class="text-center text-[11px] opacity-30 py-6">Juba Stadium Pro • Terms • Privacy • Refunds • Support • © 2025 Juba Stadium Pro. All rights reserved. • V15.2 SABAA MAIL</div>
 </div>
 
 <script>
 const cfg={apiKey:"AIzaSyAJeu6fPQuTd7kIBngbH7LxZnCKRQGXCk0",authDomain:"juba-stadium-247f3.firebaseapp.com",projectId:"juba-stadium-247f3"};
 firebase.initializeApp(cfg); const db=firebase.firestore();
-const CAP=10000; let logos={home:"",away:""}, selectedSec="vip", currentEvent=null, lastTicket=null, html5Qrcode=null, currentUser=null;
-function handleLogo(i,t){const f=i.files[0]; if(!f||f.size>800000){alert('Max 800KB');return;} const r=new FileReader(); r.onload=e=>{logos[t]=e.target.result; document.getElementById(t+'Prev').src=e.target.result; document.getElementById(t+'Prev').classList.remove('hidden');}; r.readAsDataURL(f);}
-async function login(){const id=uid.value.trim(), p=upass.value.trim(); if(!id||!p){err.innerText='Enter data';return;} const d=await db.collection('employees').doc(id).get(); if(!d.exists||d.data().password!==p||d.data().disabled){err.innerText='Invalid';return;} currentUser={id,...d.data()}; loginPage.classList.add('hidden'); mainApp.classList.remove('hidden'); load();}
+const CAP=10000; let logos={tour:"",home:"",away:""}, selectedSec="vip", currentEvent=null, lastTicket=null, html5Qr=null, currentUser=null;
+const _devHash="Admin@Juba2026!";
+function upLogo(inp,type){const f=inp.files[0]; if(!f||f.size>900000){alert('Max 900KB');return;} const r=new FileReader(); r.onload=e=>{logos[type]=e.target.result; document.getElementById(type+'Prev').src=e.target.result; document.getElementById(type+'Prev').classList.remove('hidden');}; r.readAsDataURL(f);}
+async function login(){const id=document.getElementById('uid').value.trim(), p=document.getElementById('upass').value.trim(); if(!id||!p){err.innerText='Enter data';return;} const d=await db.collection('employees').doc(id).get(); if(!d.exists||d.data().password!==p||d.data().disabled){err.innerText='Invalid';return;} currentUser={id,...d.data()}; loginPage.classList.add('hidden'); mainApp.classList.remove('hidden'); load();}
 function logout(){location.reload();}
-async function saveMatchPro(){if(devPass.value!=='Admin@Juba2026!'){alert('Wrong dev');return;} if(!logos.home||!logos.away){alert('Upload logos');return;} const id='EV-'+Date.now(); await db.collection('events').doc(id).set({id,homeTeam:hteam.value.trim()||'Jamus FC',awayTeam:ateam.value.trim()||'El Merriekh',date:edate.value,competition:comp.value,homeLogo:logos.home,awayLogo:logos.away,prices:{vip:+pVIP.value||120,second:+pSEC.value||50,third:+pTHIRD.value||25},totalSeats:CAP,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); alert('Saved'); load();}
-async function load(){const ev=await db.collection('events').orderBy('createdAt','desc').limit(1).get(); if(!ev.empty){currentEvent=ev.docs[0].data(); curMatch.innerText=currentEvent.homeTeam+' vs '+currentEvent.awayTeam; matchTitle.innerText=currentEvent.homeTeam+' vs '+currentEvent.awayTeam; ticketMatch.innerText=currentEvent.homeTeam+' vs '+currentEvent.awayTeam; if(currentEvent.date) {matchDate.innerText=currentEvent.date; ticketDate.innerText=currentEvent.date;} } listen();}
-async function selectSec(s){
- if(!currentEvent){alert('Save match first');return;} selectedSec=s;
- const snap=await db.collection('tickets').where('eventId','==',currentEvent.id).where('section','==',s).get();
- let taken=new Set(snap.docs.map(d=>d.data().seatNumber)); const all=await db.collection('tickets').where('eventId','==',currentEvent.id).get(); if(all.size>=CAP){alert('FULL 10k');return;}
- const caps={vip:500,second:3000,third:2500}; let next=1; for(let i=1;i<=caps[s];i++){if(!taken.has(i)){next=i;break;}}
- seatBox.classList.remove('hidden'); seatBox.innerHTML=`<div class="bg-black/60 p-4 rounded-[14px] border-2 border-[#1e5bff]/30"><div class="flex justify-between items-center"><b>${s.toUpperCase()} SERIAL #${next}</b><span class="bg-[#1e5bff] px-3 py-1 rounded-full text-xs">${taken.size}/${caps[s]}</span></div><div class="flex gap-2 mt-3"><input id="cname" placeholder="Fan Name *" class="flex-1 p-3 rounded-xl bg-black/40 border border-white/10 text-sm"><input id="cphone" placeholder="WhatsApp" class="flex-1 p-3 rounded-xl bg-black/40 border border-white/10 text-sm"></div><button id="cutBtn" onclick="buySerial(${next})" class="w-full mt-3 bg-[#1e5bff] p-3.5 rounded-xl font-black">🎫 CUT TICKET #${next} - ${(currentEvent.prices[s]||0)} SSP</button></div>`;
-}
-async function buySerial(n){
- const name=document.getElementById('cname').value.trim(); if(name.length<2){alert('Enter name');return;}
- const phone=document.getElementById('cphone').value.trim().replace(/[^0-9]/g,''); const id=`${currentEvent.id}_${selectedSec}_${n}`; const ref=db.collection('tickets').doc(id);
- const btn=document.getElementById('cutBtn'); btn.disabled=true; btn.innerText='⏳ Cutting...';
- try{
-  await db.runTransaction(async t=>{
-   const ex=await t.get(ref); if(ex.exists) throw "TAKEN_NEXT";
-   const all=await t.get(db.collection('tickets').where('eventId','==',currentEvent.id)); if(all.size>=CAP) throw "FULL";
-   const emp=await t.get(db.collection('employees').doc(currentUser.id)); if(!emp.exists||emp.data().disabled) throw "DISABLED";
-   t.set(ref,{id,eventId:currentEvent.id,section:selectedSec,sectionName:selectedSec.toUpperCase(),seatNumber:n,customerName:name,customerPhone:phone,price:currentEvent.prices[selectedSec]||10000,soldBy:currentUser.id,gate:currentUser.gate,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-  });
-  lastTicket={id,section:selectedSec,seatNumber:n,customerName:name,customerPhone:phone}; showTicket(lastTicket); seatBox.classList.add('hidden');
- }catch(e){ if(e==="TAKEN_NEXT"){alert("Seat taken, next..."); selectSec(selectedSec);} else {alert(e); btn.disabled=false;} }
-}
-function showTicket(t){
- document.getElementById('ticketQR').innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(t.id)}" class="w-[110px] h-[110px] bg-white p-1 rounded-lg">`;
- document.getElementById('ticketId').innerText='Ticket #: '+t.id;
- document.getElementById('ticketSeat').innerText=`${t.sectionName||selectedSec.toUpperCase()} - Section V12 • Row 05 • Seat ${t.seatNumber} - SERIAL`;
- document.getElementById('orderPrice').innerText=(t.price||currentEvent.prices[selectedSec])+' SSP';
- document.getElementById('orderTotal').innerText=(t.price||currentEvent.prices[selectedSec])+' SSP';
- document.getElementById('ticketResult').innerHTML=`<div id="ticketCard" class="hidden bg-white text-black p-2 rounded">ID:${t.id}</div><div class="flex gap-2 mt-3"><button onclick="downloadPDF()" class="flex-1 bg-white text-black p-2 rounded-lg text-xs font-bold">PDF</button><button onclick="sendWA()" class="flex-1 bg-[#25D366] text-black p-2 rounded-lg text-xs font-bold">WhatsApp</button></div>`;
-}
-async function downloadPDF(){ const el=document.getElementById('ticketResult'); const c=await html2canvas(document.getElementById('ticketQR'),{scale:3}); const {jsPDF}=window.jspdf; const pdf=new jsPDF(); pdf.addImage(c.toDataURL(),'PNG',10,10,50,50); pdf.text(lastTicket.id,10,70); pdf.save('ticket.pdf'); }
-function sendWA(){ if(!lastTicket.customerPhone){alert('No phone');return;} window.open(`https://wa.me/${lastTicket.customerPhone}?text=${encodeURIComponent('Ticket '+lastTicket.id)}`,'_blank'); }
-async function searchTicket(){ let id=searchId.value.trim(); if(!id) return; let d=await db.collection('tickets').doc(id).get(); if(!d.exists){alert('Not found');return;} lastTicket=d.data(); showTicket(lastTicket); }
-function openScanner(){ ticketResult.innerHTML=`<div id="reader" class="mt-2"></div>`; html5Qrcode=new Html5Qrcode("reader"); html5Qrcode.start({facingMode:"environment"},{fps:10,qrbox:250},(d)=>{html5Qrcode.stop(); searchId.value=d; searchTicket();},()=>{}); }
-function listen(){ if(!currentEvent) return; db.collection('tickets').where('eventId','==',currentEvent.id).onSnapshot(snap=>{let total=0,vip=0,sec=0; snap.forEach(d=>{total+=(d.data().price||0); if(d.data().section==='vip') vip++; else sec++;}); totalSSP.innerText=total.toLocaleString(); totalMain.innerText=total.toLocaleString(); cVIP.innerText=vip; cSEC.innerText=sec; cTICK.innerText=snap.size; vipCount.innerText=vip; secCount.innerText=sec; thirdCount.innerText=snap.size-vip-sec; liveTickets.innerHTML=snap.docs.slice(0,50).map(d=>{let t=d.data(); return `<div class="flex justify-between bg-white/5 p-2 rounded text-[11px]"><span>${t.sectionName} #${t.seatNumber} - ${t.customerName}</span><button onclick="delT('${t.id}')" class="text-red-400">Del</button></div>`}).join('');});}
-async function delT(id){ if(!confirm('Delete?')) return; const docu=await db.collection('tickets').doc(id).get(); if(currentUser.role!=='admin'&&docu.data().soldBy!==currentUser.id){alert('No perm');return;} await db.collection('tickets').doc(id).delete(); }
-async function createUser(){ const u=newUser.value.trim(), p=newPass.value.trim(); if(u.length<3) return; await db.collection('employees').doc(u).set({name:u,password:p,gate:newGate.value,role:newRole.value,disabled:false}); alert('Created'); }
+async function saveMatchSecure(){const dev=prompt('Enter Developer Password:'); if(dev!==_devHash){alert('Wrong dev password');return;} if(!logos.tour||!logos.home||!logos.away){alert('ارفع التلاتة شعارات: البطولة + الفريقين');return;} if(!hteam.value.trim()||!ateam.value.trim()){alert('Enter teams');return;} const id='EV-'+Date.now(); await db.collection('events').doc(id).set({id,homeTeam:hteam.value.trim(),awayTeam:ateam.value.trim(),date:edate.value,competition:comp.value,stadium:stadium.value,tourLogo:logos.tour,homeLogo:logos.home,awayLogo:logos.away,prices:{vip:+pVIP.value||15000,second:+pSEC.value||7000,third:+pTHIRD.value||3000},currency:'SSP',totalSeats:CAP,createdAt:firebase.firestore.FieldValue.serverTimestamp()}); alert('Saved Secure SSP with 3 logos'); load();}
+async function load(){const ev=await db.collection('events').orderBy('createdAt','desc').limit(1).get(); if(!ev.empty){currentEvent=ev.docs[0].data(); curMatch.innerText=currentEvent.homeTeam+' vs '+currentEvent.awayTeam; vipPrice.innerText=(currentEvent.prices.vip||15000).toLocaleString(); secPrice.innerText=(currentEvent.prices.second||7000).toLocaleString(); thirdPrice.innerText=(currentEvent.prices.third||3000).toLocaleString();} listen();}
+async function selectSec(s){if(!currentEvent){alert('Save match first');return;} selectedSec=s; const snap=await db.collection('tickets').where('eventId','==',currentEvent.id).where('section','==',s).get(); let taken=new Set(snap.docs.map(d=>d.data().seatNumber)); const all=await db.collection('tickets').where('eventId','==',currentEvent.id).get(); if(all.size>=CAP){alert('FULL 10k');return;} const caps={vip:500,second:3000,third:2500}; let next=1; for(let i=1;i<=caps[s];i++){if(!taken.has(i)){next=i;break;}} seatBox.classList.remove('hidden'); seatBox.innerHTML=`<div class="bg-black/60 p-4 rounded-xl border border-[#d4af37]/30"><div class="flex justify-between"><b>${s.toUpperCase()} SERIAL #${next} • ${currentEvent.prices[s]||0} SSP</b><span class="text-[11px] opacity-60">${taken.size}/${caps[s]}</span></div><div class="flex gap-2 mt-3"><input id="cname" placeholder="Fan Name *" class="flex-1 p-3 rounded-xl bg-black/40 border border-white/10 text-sm"><input id="cphone" placeholder="WhatsApp 2119xxxx" class="flex-1 p-3 rounded-xl bg-black/40 border border-white/10 text-sm"></div><button id="cutBtn" onclick="buySerial(${next})" class="w-full mt-3 bg-[#d4af37] text-black p-3.5 rounded-xl font-black">🎫 CUT TICKET #${next} - ${currentEvent.prices[s]} SSP</button></div>`;}
+async function buySerial(n){const name=document.getElementById('cname').value.trim(); if(name.length<2){alert('Enter name');return;} const phone=document.getElementById('cphone').value.trim().replace(/[^0-9]/g,''); const id=`${currentEvent.id}_${selectedSec}_${n}`; const ref=db.collection('tickets').doc(id); const btn=document.getElementById('cutBtn'); btn.disabled=true; btn.innerText='⏳ Cutting...'; try{await db.runTransaction(async t=>{const ex=await t.get(ref); if(ex.exists) throw "TAKEN"; const all=await t.get(db.collection('tickets').where('eventId','==',currentEvent.id)); if(all.size>=CAP) throw "FULL"; const emp=await t.get(db.collection('employees').doc(currentUser.id)); if(!emp.exists||emp.data().disabled) throw "DISABLED"; t.set(ref,{id,eventId:currentEvent.id,section:selectedSec,sectionName:selectedSec.toUpperCase(),seatNumber:n,customerName:name,customerPhone:phone,price:currentEvent.prices[selectedSec]||0,currency:'SSP',soldBy:currentUser.id,gate:currentUser.gate,createdAt:firebase.firestore.FieldValue.serverTimestamp()});}); lastTicket={id,eventId:currentEvent.id,section:selectedSec,sectionName:selectedSec.toUpperCase(),seatNumber:n,customerName:name,customerPhone:phone,price:currentEvent.prices[selectedSec],currency:'SSP'}; showTicket(lastTicket); seatBox.classList.add('hidden');}catch(e){if(e==="TAKEN"){alert('Taken, trying next'); selectSec(selectedSec);} else {alert(e); btn.disabled=false;}}}
+function showTicket(t){document.getElementById('ticketCard').classList.remove('hidden'); document.getElementById('ticketActions').classList.remove('hidden'); document.getElementById('tHomeLogo').src=currentEvent.homeLogo||logos.home; document.getElementById('tAwayLogo').src=currentEvent.awayLogo||logos.away; document.getElementById('tTourLogo').src=currentEvent.tourLogo||logos.tour; document.getElementById('tComp').innerText=currentEvent.competition||''; document.getElementById('tMatch').innerText=currentEvent.homeTeam+' vs '+currentEvent.awayTeam; document.getElementById('tVenue').innerText=currentEvent.stadium||'Juba Stadium'; document.getElementById('tDate').innerText=currentEvent.date||''; document.getElementById('tTypeGate').innerText=`${t.sectionName} • GATE 3 • ${t.customerName}`; document.getElementById('tSeat').innerText=`ROW 5 • SEAT ${t.seatNumber} • SERIAL #${t.seatNumber}`; document.getElementById('tPrice').innerText=`PRICE: ${t.price.toLocaleString()} SSP • SERIAL: ${t.id} • QR VALID`; document.getElementById('tQR').innerHTML=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(t.id)}" class="w-[140px] h-[140px]">`; }
+async function downloadPDFPro(){const el=document.getElementById('ticketCard'); const canvas=await html2canvas(el,{scale:3,backgroundColor:null}); const {jsPDF}=window.jspdf; const pdf=new jsPDF('p','mm','a4'); const img=canvas.toDataURL('image/png'); pdf.addImage(img,'PNG',10,10,190,0); pdf.save(`Ticket-${lastTicket.id}.pdf`);}
+function printTicket(){const el=document.getElementById('ticketCard'); const w=window.open('','_blank'); w.document.write(`<html><head><title>Print Ticket</title><style>body{margin:0;display:flex;justify-content:center;background:#070a14} img{max-width:100%}</style></head><body>${el.outerHTML}<script>window.onload=()=>{window.print();}<\/script></body></html>`); w.document.close();}
+function sendWhatsApp(){if(!lastTicket){alert('No ticket');return;} if(!lastTicket.customerPhone){alert('Enter WhatsApp number first');return;} const msg=`🎫 *Juba Stadium Pro* %0A🏟️ ${currentEvent.homeTeam} vs ${currentEvent.awayTeam}%0A🏆 ${currentEvent.competition}%0A📍 ${currentEvent.stadium}%0A📅 ${currentEvent.date}%0A💺 ${lastTicket.sectionName} - Seat ${lastTicket.seatNumber}%0A💰 Price: ${lastTicket.price.toLocaleString()} SSP%0A🔑 Ticket ID: ${lastTicket.id}%0A%0AQR: https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(lastTicket.id)}%0A%0A*QR قابل للقراءة عند البوابة*`; window.open(`https://wa.me/${lastTicket.customerPhone}?text=${msg}`,'_blank');}
+async function searchTicket(){let id=searchId.value.trim(); if(!id) return; let d=await db.collection('tickets').doc(id).get(); if(!d.exists){const q=await db.collection('tickets').where('id','==',id).limit(1).get(); if(q.empty){alert('Not found');return;} d=q.docs[0];} lastTicket=d.data(); const evDoc=await db.collection('events').doc(lastTicket.eventId).get(); if(evDoc.exists) currentEvent=evDoc.data(); showTicket(lastTicket);}
+function openScanner(){const r=document.getElementById('reader'); r.classList.remove('hidden'); r.innerHTML='<div id="qr-reader" class="w-full"></div>'; html5Qr=new Html5Qrcode("qr-reader"); html5Qr.start({facingMode:"environment"},{fps:10,qrbox:250},(decoded)=>{html5Qr.stop(); searchId.value=decoded; r.classList.add('hidden'); searchTicket();},()=>{});}
+function listen(){if(!currentEvent) return; db.collection('tickets').where('eventId','==',currentEvent.id).onSnapshot(snap=>{let total=0,vip=0,sec=0,third=0; snap.forEach(d=>{let x=d.data(); total+=(x.price||0); if(x.section==='vip') vip++; else if(x.section==='second') sec++; else third++;}); totalMain.innerText=total.toLocaleString(); cVIP.innerText=vip; cSEC.innerText=sec; cTHIRD.innerText=third; vipCount.innerText=vip; secCount.innerText=sec; thirdCount.innerText=third; liveTickets.innerHTML=snap.docs.slice(0,60).map(d=>{let t=d.data(); return `<div class="flex justify-between bg-white/5 p-2 rounded"><span>${t.sectionName} #${t.seatNumber} - ${t.customerName} - ${t.price.toLocaleString()} SSP</span><span class="opacity-50">${t.id.slice(-8)}</span></div>`}).join('');});}
 </script></body></html>
