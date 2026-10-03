@@ -1,17 +1,21 @@
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-const firebaseConfig = const firebaseConfig = {
-  apiKey: "AIzaSyAJeu6fPQuTd7kIBngbH7LxZnCKRQGXCk0",
-  authDomain: "juba-stadium-247f3.firebaseapp.com",
-  projectId: "juba-stadium-247f3",
-  storageBucket: "juba-stadium-247f3.firebasestorage.app",
-  messagingSenderId: "314725857339",
-  appId: "1:314725857339:web:79885c6c7bddb21997841e"
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
+
+const firebaseConfig = { 
+  apiKey: "AIzaSyAJeu6fPQuTd7kIBngbH7LxZnCKRQGXCk0", 
+  authDomain: "juba-stadium-247f3.firebaseapp.com", 
+  projectId: "juba-stadium-247f3", 
+  storageBucket: "juba-stadium-247f3.firebasestorage.app", 
+  messagingSenderId: "314725857339", 
+  appId: "1:314725857339:web:79885c6c7bddb21997841e" 
 };
+
 const db = getFirestore(initializeApp(firebaseConfig));
-await setDoc(doc(db,"employees","admin"),{name:"Admin",password:"admin",gate:"GATE 1",role:"admin"});
-await setDoc(doc(db,"employees","EMP-101"),{name:"John Gate1",password:"1234",gate:"GATE 1",role:"ticketing"});
-await setDoc(doc(db,"employees","EMP-102"),{name:"Peter Gate2",password:"1234",gate:"GATE 2",role:"ticketing"});
+
+await setDoc(doc(db,"employees","admin"),{name:"Admin", password:"admin", role:"admin"});
+await setDoc(doc(db,"employees","EMP-101"),{name:"Employee 101", password:"1234", role:"staff"});
+await setDoc(doc(db,"employees","EMP-102"),{name:"Employee 102", password:"1234", role:"staff"});
+
 alert("✅ تم انشاء admin / admin و EMP-101 / 1234");
 </script>
