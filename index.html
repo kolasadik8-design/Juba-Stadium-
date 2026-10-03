@@ -88,9 +88,16 @@ input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--l
     <p id="loginErr" style="color:#ff5a5a;font-size:12px;margin-top:8px;display:none"></p>
   </div>
 </div>
-
 <script>
-const firebaseConfig = { apiKey: "AIzaSyB65erIbKPojeJCtvWCaUPNBqA_YQ6QGJ0", authDomain: "juba-stadium-1ace0.firebaseapp.com", projectId: "juba-stadium-1ace0", storageBucket: "juba-stadium-1ace0.firebasestorage.app", messagingSenderId: "299347484908", appId: "1:299347484908:web:926e359973c26aa1f0c5c9" };
+const firebaseConfig = {
+  apiKey: "AIzaSyAJeu6fPQuTd7kIBngbH7LxZnCKRQGXCk0",
+  authDomain: "juba-stadium-247f3.firebaseapp.com",
+  projectId: "juba-stadium-247f3",
+  storageBucket: "juba-stadium-247f3.firebasestorage.app",
+  messagingSenderId: "314725857339",
+  appId: "1:314725857339:web:79885c6c7bddb21997841e"
+};
+  
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 let currentEmp = null;
@@ -98,7 +105,6 @@ let prices = {vip:50000,a:30000,b:20000};
 let currentEvent = null;
 
 function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
-
 let c=0; document.getElementById('secretLogo').onclick=()=>{ c++; if(c>=5){ document.getElementById('loginModal').style.display='flex'; c=0 } setTimeout(()=>c=0,2000) }
 function closeLogin(){ document.getElementById('loginModal').style.display='none' }
 function loginEmp(){
